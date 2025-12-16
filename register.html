@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>VITAP Registration</title>
+  <link rel="stylesheet" href="style.css">
+  <script>
+    function validateForm(event) {
+      event.preventDefault();
+      let email = document.getElementById("email").value;
+      let phone = document.getElementById("phone").value;
+      let emailPattern = /^[^ ]+@[^ ]+\.[a-z]{2,3}$/;
+      let phonePattern = /^[0-9]{10}$/;
+
+      if (!email.match(emailPattern)) {
+        alert("Please enter a valid email address.");
+        return false;
+      }
+      if (!phone.match(phonePattern)) {
+        alert("Phone number must be 10 digits.");
+        return false;
+      }
+      alert("Registration Successful!");
+      return true;
+    }
+
+    function cancelRegistration() {
+      window.location.href = "index.html"; // Redirect to homepage
+    }
+  </script>
+</head>
+<body>
+  <div class="form-container">
+    <h2>Student Registration</h2>
+    <form onsubmit="validateForm(event)">
+      <label for="name">Name:</label>
+      <input type="text" id="name" name="name" required>
+
+      <label for="regno">Registration No.:</label>
+      <input type="text" id="regno" name="regno" required>
+
+      <label for="email">Email:</label>
+      <input type="email" id="email" name="email" required>
+
+      <label for="phone">Phone Number:</label>
+      <input type="tel" id="phone" name="phone" required>
+
+      <div class="buttons">
+        <button type="submit" class="btn">Register</button>
+        <button type="button" class="btn cancel" onclick="cancelRegistration()">Cancel</button>
+      </div>
+    </form>
+  </div>
+</body>
+</html>
