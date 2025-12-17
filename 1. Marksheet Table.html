@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html lang = "en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Student Marksheet Table</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            padding: 40px 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        h1 {
+            text-align: center;
+            color: #ffffff;
+            font-size: 2.5em;
+            margin-bottom: 30px;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+            letter-spacing: 2px;
+        }
+        
+        table {
+            width: 90%;
+            max-width: 900px;
+            border-collapse: separate;
+            border-spacing: 0;
+            margin: 20px auto;
+            background-color: white;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+            border-radius: 12px;
+            overflow: hidden;
+        }
+        
+        thead {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+        
+        th {
+            padding: 18px 15px;
+            text-align: center;
+            font-weight: 600;
+            font-size: 1.1em;
+            letter-spacing: 0.5px;
+            text-transform: uppercase;
+            border: none;
+        }
+        
+        th:first-child {
+            border-top-left-radius: 12px;
+        }
+        
+        th:last-child {
+            border-top-right-radius: 12px;
+        }
+        
+        td {
+            padding: 16px 15px;
+            text-align: center;
+            border-bottom: 1px solid #e8e8e8;
+            font-size: 1em;
+            color: #333;
+            transition: all 0.3s ease;
+        }
+        
+        tbody tr {
+            background-color: white;
+            transition: all 0.3s ease;
+        }
+        
+        tbody tr:nth-child(even) {
+            background-color: #f8f9fa;
+        }
+        
+        tbody tr:hover {
+            background-color: #e3e8ff;
+            transform: scale(1.01);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+        
+        tbody tr:last-child td:first-child {
+            border-bottom-left-radius: 12px;
+        }
+        
+        tbody tr:last-child td:last-child {
+            border-bottom-right-radius: 12px;
+        }
+        
+        tbody tr:last-child td {
+            border-bottom: none;
+        }
+        
+        td:nth-child(2) {
+            text-align: left;
+            padding-left: 20px;
+            font-weight: 500;
+            color: #2c3e50;
+        }
+        
+        td:nth-child(6) {
+            font-weight: 700;
+            color: #667eea;
+            font-size: 1.1em;
+        }
+        
+        @media (max-width: 768px) {
+            h1 {
+                font-size: 1.8em;
+                margin-bottom: 20px;
+            }
+            
+            table {
+                width: 100%;
+                font-size: 0.9em;
+            }
+            
+            th, td {
+                padding: 12px 8px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <h1> Student Marksheet </h1>
+    <table>
+        <thead>
+            <tr>
+                <th>Roll No.</th>
+                <th>Name</th>
+                <th>Subject 1</th>
+                <th>Subject 2</th>
+                <th>Subject 3</th>
+                <th>Total</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td>101</td>
+                <td>Riyan</td>
+                <td>85</td>
+                <td>92</td>
+                <td>88</td>
+                <td>265</td>
+            </tr>
+            <tr>
+                <td>102</td>
+                <td>Tanisha</td>
+                <td>78</td>
+                <td>85</td>
+                <td>90</td>
+                <td>253</td>
+            </tr>
+            <tr>
+                <td>103</td>
+                <td>Sienna</td>
+                <td>92</td>
+                <td>88</td>
+                <td>95</td>
+                <td>275</td>
+            </tr>
+            <tr>
+                <td>104</td>
+                <td>Shreyas</td>
+                <td>88</td>
+                <td>90</td>
+                <td>87</td>
+                <td>265</td>
+            </tr>
+            <tr>
+                <td>105</td>
+                <td>Akshat</td>
+                <td>75</td>
+                <td>82</td>
+                <td>79</td>
+                <td>236</td>
+            </tr>
+        </tbody>
+    </table>
+</body>
+</html>

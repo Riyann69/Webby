@@ -1,0 +1,95 @@
+<!DOCTYPE>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Product Card</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            font-family: 'Arial', sans-serif;
+            background: linear-gradient(135deg, #8B1A3D 0%, #2D0000 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+        .product-card {
+            background-color: #ffffff;
+            border: 2px solid #e0e0e0;
+            border-radius: 15px;
+            padding: 25px;
+            margin: 20px;
+            max-width: 350px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+        .product-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 40px rgba(0, 0, 0, 0.3);
+        }
+        .product-image {
+            width: 100%;
+            height: 250px;
+            object-fit: cover;
+            border-radius: 10px;
+            border: 1px solid #ddd;
+            margin-bottom: 20px;
+        }
+        .product-title {
+            font-size: 24px;
+            font-weight: bold;
+            color: #333;
+            margin-bottom: 10px;
+        }
+        .product-description {
+            font-size: 14px;
+            color: #666;
+            line-height: 1.6;
+            margin-bottom: 15px;
+        }
+        .product-price {
+            font-size: 28px;
+            font-weight: bold;
+            color: #8B2635;
+            margin-bottom: 20px;
+        }
+        .buy-button {
+            width: 100%;
+            padding: 12px 24px;
+            background-color: #8B2635;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: bold;
+            cursor: pointer;
+            transition: background-color 0.3s ease, transform 0.2s ease;
+            box-shadow: 0 4px 10px rgba(139, 38, 53, 0.3);
+        }
+        .buy-button:hover {
+            background-color: #722F37;
+            transform: scale(1.05);
+            box-shadow: 0 6px 15px rgba(139, 38, 53, 0.4);
+        }
+        .buy-button:active {
+            transform: scale(0.98);
+        }
+    </style>
+</head>
+<body>
+    <div class="product-card">
+         <img src="https://assets3.razerzone.com/79DJZ1mVuFLRkSaJycHxYVkJoR8=/1500x1000/https%3A%2F%2Fmedias-p1.phoenix.razer.com%2Fsys-master-phoenix-images-container%2Fh4b%2Fh63%2F9939308281886%2Fbs-v3-pro-white-1500x1000-6.jpg" alt="Product Image" class="product-image">
+         <h2 class="product-title">Razer BlackShark V3 Pro</h2>
+         <p class="product-description"> 
+            The esports headset trusted by pros evolves. The Razer BlackShark V3 Pro is our most advanced wireless ANC esports headset, built to keep you ahead with industry-leading ultra-low latency wireless technology that delivers audio as fast as 10 ms, plus a Full Band mic for pro-grade clarity, victory is all but assured.    
+        </p>
+         <div class="product-price">$249.99</div>
+         <button class="buy-button">Buy Now</button>
+    </div>
+</body>
+</html>

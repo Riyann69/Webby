@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Personal Portfolio</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            background-color: #f5f5f5;
+        }
+        
+        /* Header Styles */
+        header {
+            background: linear-gradient(135deg, #1e7e34 0%, #0d2818 100%);
+            color: white;
+            text-align: center;
+            padding: 60px 20px;
+            margin-bottom: 40px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+        
+        header h1 {
+            font-size: 48px;
+            margin-bottom: 15px;
+            font-weight: 700;
+        }
+        
+        header p {
+            font-size: 20px;
+            font-style: italic;
+            opacity: 0.95;
+        }
+        
+        /* Main Content Container */
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+        
+        /* Section Styles */
+        section {
+            background-color: white;
+            margin-bottom: 30px;
+            padding: 40px;
+            border-radius: 10px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        }
+        
+        section h2 {
+            color: #1e7e34;
+            font-size: 32px;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 3px solid #1e7e34;
+        }
+        
+        /* About Me Section */
+        #about p {
+            font-size: 16px;
+            line-height: 1.8;
+            color: #555;
+            text-align: justify;
+        }
+        
+        /* Skills Section */
+        #skills ul {
+            list-style-type: none;
+            padding-left: 0;
+        }
+        
+        #skills li {
+            background-color: #f0f0f0;
+            margin: 12px 0;
+            padding: 15px 20px;
+            border-radius: 8px;
+            font-size: 16px;
+            border-left: 4px solid #0d2818;
+            transition: transform 0.2s ease, background-color 0.2s ease;
+        }
+        
+        #skills li:hover {
+            transform: translateX(5px);
+            background-color: #e8f5e9;
+        }
+        
+        /* Projects Section */
+        #projects .project {
+            background-color: #f9f9f9;
+            padding: 20px;
+            margin: 15px 0;
+            border-radius: 8px;
+            border-left: 4px solid #1e7e34;
+        }
+        
+        #projects .project h3 {
+            color: #0d2818;
+            font-size: 24px;
+            margin-bottom: 10px;
+        }
+        
+        #projects .project p {
+            color: #666;
+            font-size: 15px;
+        }
+        
+        /* Footer Styles */
+        footer {
+            background: linear-gradient(135deg, #1e7e34 0%, #0d2818 100%);
+            color: white;
+            text-align: center;
+            padding: 30px 20px;
+            margin-top: 40px;
+        }
+        
+        footer p {
+            font-size: 16px;
+            margin: 8px 0;
+        }
+        
+        footer a {
+            color: white;
+            text-decoration: none;
+            font-weight: bold;
+            transition: opacity 0.3s ease;
+        }
+        
+        footer a:hover {
+            opacity: 0.8;
+            text-decoration: underline;
+        }
+    </style>
+</head>
+<body>
+    <!-- Header with Name and Tagline -->
+    <header>
+        <h1>Riyan Wankhede</h1>
+        <p>Computer Science Student | Machine Learning & Applied AI Enthusiast</p>
+    </header>
+    
+    <!-- Main Content -->
+    <div class="container">
+        <!-- About Me Section -->
+        <section id="about">
+            <h2>About Me</h2>
+            <p>
+                I am a Computer Science undergraduate with hands-on experience in machine learning,
+                data-driven systems, and AI-powered applications. I have worked on real-world logistics
+                and analytics problems, focusing on predictive modeling, route optimization, and
+                practical deployment of ML solutions. I enjoy building systems that combine strong
+                algorithmic foundations with modern AI techniques.
+            </p>
+        </section>
+        
+        <!-- Skills Section -->
+        <section id="skills">
+            <h2>Skills</h2>
+            <ul>
+                <li>Python</li>
+                <li>Machine Learning</li>
+                <li>Deep Learning</li>
+                <li>Data Visualization & Analytics</li>
+                <li>Problem Solving & Algorithms</li>
+                <li>Responsive Web Design</li>
+                <li>Git & Version Control</li>
+                <li>UI/UX Design</li>
+            </ul>
+        </section>
+        
+        <!-- Projects Section -->
+        <section id="projects">
+            <h2>Projects</h2>
+            <div class="project">
+                <h3>Adaptive ETA Prediction System for Inland Waterway Cargo</h3>
+                <p>
+                    Built a machine learning–based system to predict cargo delivery times for inland waterways 
+                    by analyzing historical movement data and operational factors. The project focuses on improving 
+                    ETA accuracy and supporting smarter logistics planning through data-driven insights.
+                </p>
+            </div>
+            <div class="project">
+                <h3>Traffic Prediction System</h3>
+                <p>
+                    Developed a machine learning–based traffic prediction system that analyzes historical 
+                    and real-time traffic data to forecast congestion levels. The model supports smarter route 
+                    planning by helping anticipate delays and optimize travel decisions.
+                </p>
+            </div>
+        </section>
+    </div>
+    
+    <!-- Footer with Contact Details -->
+    <footer>
+        <p><strong>Contact Me</strong></p>
+        <p>Email: <a href="mailto:john.doe@example.com">riyanwankhede@gmail.com</a></p>
+        <p>Phone: +91 8234725721</p>
+    </footer>
+</body>
+</html>
