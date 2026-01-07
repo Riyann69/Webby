@@ -379,7 +379,6 @@
   <script>
     const STORAGE_KEY = 'userManagementUsers';
     
-    // DOM Elements
     const form = document.getElementById('registrationForm');
     const nameInput = document.getElementById('name');
     const emailInput = document.getElementById('email');
@@ -393,18 +392,15 @@
     const usersCount = document.getElementById('usersCount');
     const clearAllBtn = document.getElementById('clearAllBtn');
 
-    // Get users from localStorage
     function getUsers() {
       const users = localStorage.getItem(STORAGE_KEY);
       return users ? JSON.parse(users) : [];
     }
 
-    // Save users to localStorage
     function saveUsers(users) {
       localStorage.setItem(STORAGE_KEY, JSON.stringify(users));
     }
 
-    // Show success message
     function showSuccess(message) {
       successMessage.textContent = message;
       successMessage.classList.add('show');
@@ -413,7 +409,6 @@
       }, 3000);
     }
 
-    // Show error message
     function showError(message) {
       errorMessage.textContent = message;
       errorMessage.classList.add('show');
@@ -422,7 +417,6 @@
       }, 4000);
     }
 
-    // Clear error messages for a field
     function clearFieldError(fieldId) {
       const field = document.getElementById(fieldId);
       const errorElement = document.getElementById(fieldId + 'Error');
@@ -430,7 +424,6 @@
       errorElement.classList.remove('show');
     }
 
-    // Show error for a field
     function showFieldError(fieldId, message) {
       const field = document.getElementById(fieldId);
       const errorElement = document.getElementById(fieldId + 'Error');
@@ -439,7 +432,6 @@
       errorElement.classList.add('show');
     }
 
-    // Validate form
     function validateForm() {
       let isValid = true;
       const name = nameInput.value.trim();
@@ -447,19 +439,16 @@
       const mobile = mobileInput.value.trim();
       const password = passwordInput.value.trim();
 
-      // Clear previous errors
       clearFieldError('name');
       clearFieldError('email');
       clearFieldError('mobile');
       clearFieldError('password');
 
-      // Validate name
       if (!name) {
         showFieldError('name', 'Name is required');
         isValid = false;
       }
 
-      // Validate email
       const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
       if (!email) {
         showFieldError('email', 'Email is required');
@@ -469,7 +458,6 @@
         isValid = false;
       }
 
-      // Validate mobile
       const mobileRegex = /^\d{10}$/;
       if (!mobile) {
         showFieldError('mobile', 'Mobile number is required');
@@ -479,7 +467,6 @@
         isValid = false;
       }
 
-      // Validate password
       if (!password) {
         showFieldError('password', 'Password is required');
         isValid = false;
@@ -491,13 +478,11 @@
       return isValid;
     }
 
-    // Check for duplicate email
     function isDuplicateEmail(email) {
       const users = getUsers();
       return users.some(user => user.email.toLowerCase() === email.toLowerCase());
     }
 
-    // Render users table
     function renderUsersTable() {
       const users = getUsers();
       usersTableBody.innerHTML = '';
@@ -527,14 +512,12 @@
       });
     }
 
-    // Escape HTML to prevent XSS
     function escapeHtml(text) {
       const div = document.createElement('div');
       div.textContent = text;
       return div.innerHTML;
     }
 
-    // Delete user
     function deleteUser(index) {
       if (confirm('Are you sure you want to delete this user?')) {
         const users = getUsers();
@@ -545,10 +528,8 @@
       }
     }
 
-    // Make deleteUser globally available
     window.deleteUser = deleteUser;
 
-    // Clear all users
     function clearAllUsers() {
       const users = getUsers();
       if (users.length === 0) {
@@ -563,7 +544,6 @@
       }
     }
 
-    // Handle form submission
     form.addEventListener('submit', (e) => {
       e.preventDefault();
 
@@ -574,14 +554,12 @@
 
       const email = emailInput.value.trim();
       
-      // Check for duplicate email
       if (isDuplicateEmail(email)) {
         showFieldError('email', 'This email is already registered');
         showError('User with this email already exists!');
         return;
       }
 
-      // Create user object
       const user = {
         name: nameInput.value.trim(),
         email: email,
@@ -589,18 +567,15 @@
         password: passwordInput.value
       };
 
-      // Save user
       const users = getUsers();
       users.push(user);
       saveUsers(users);
 
-      // Reset form and update table
       form.reset();
       renderUsersTable();
       showSuccess('User registered successfully!');
     });
 
-    // Real-time validation
     [nameInput, emailInput, mobileInput, passwordInput].forEach(input => {
       input.addEventListener('blur', () => {
         if (input.value.trim()) {
@@ -615,10 +590,8 @@
       });
     });
 
-    // Clear all button
     clearAllBtn.addEventListener('click', clearAllUsers);
 
-    // Initial render
     renderUsersTable();
   </script>
 </body>
