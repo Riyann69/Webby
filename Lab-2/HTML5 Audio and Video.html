@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HTML5 Audio and Video</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 32px 24px 48px;
+            background: #f7f8fb;
+            color: #111827
+        }
+
+        h1 {
+            margin-top: 0;
+            margin-bottom: 8px;
+            font-size: 28px;
+        }
+
+        h2 {
+            margin: 24px 0 8px;
+        }
+
+        .player-card {
+            background: #ffffff;
+            border: 1px solid #e5e7eb;
+            border-radius: 12px;
+            padding: 16px;
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.05);
+        }
+
+        .time {
+            margin-top: 8px;
+            font-size:  14px;
+            color: #374151;
+        }
+
+        video, audio {
+            width: 100%;
+            outline: none;
+        }
+
+        video {
+            max-width: 720px;
+            height: auto;
+            display: block;
+        }
+    </style>
+</head>
+<body>
+    <h1>HTML5 Audio and Video</h1>
+    <p>Play, pause, adjust volume, and watch the timer update as media plays.</p>
+  
+    <section class="player-card" aria-label="Audio player">
+      <h2>Audio Demo</h2>
+      <audio id="audioPlayer" controls>
+        <source src="https://upload.wikimedia.org/wikipedia/commons/c/c8/Example.ogg" type="audio/ogg">
+        <source src="https://file-examples.com/storage/fe7fe5fb1b5f6e4f1cd2c8c/2017/11/file_example_MP3_700KB.mp3" type="audio/mpeg">
+        Your browser does not support the audio element.
+      </audio>
+      <div class="time">Current time: <span id="audioTime">0:00</span></div>
+    </section>
+    
+    <section class="player-card" aria-label="Video player" style="margin-top: 24px;">
+    <h2>Video Demo</h2>
+    <video id="videoPlayer" controls poster="https://peach.blender.org/wp-content/uploads/title_anouncement.jpg?x11217">
+      <source src="https://sample-videos.com/video321/mp4/720/big_buck_bunny_720p_1mb.mp4" type="video/mp4">
+      <source src="https://download.blender.org/peach/bigbuckbunny_movies/big_buck_bunny_480p_surround-fix.avi" type="video/avi">
+      Your browser does not support the video tag.
+    </video>
+    <div class="time">Current time: <span id="videoTime">0:00</span></div>
+  </section>
+
+  <script>
+    // Format seconds to M:SS
+    function formatTime(seconds) {
+      const mins = Math.floor(seconds / 60);
+      const secs = Math.floor(seconds % 60);
+      return `${mins}:${secs.toString().padStart(2, "0")}`;
+    }
+
+    function setupTimeDisplay(playerId, displayId) {
+      const player = document.getElementById(playerId);
+      const display = document.getElementById(displayId);
+
+      player.addEventListener("timeupdate", () => {
+        display.textContent = formatTime(player.currentTime);
+      });
+
+      // Update once metadata is loaded to show 0:00 immediately
+      player.addEventListener("loadedmetadata", () => {
+        display.textContent = formatTime(player.currentTime);
+      });
+    }
+
+    setupTimeDisplay("audioPlayer", "audioTime");
+    setupTimeDisplay("videoPlayer", "videoTime");
+  </script>
+</body>
+</html>

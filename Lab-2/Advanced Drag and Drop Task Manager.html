@@ -1,0 +1,281 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Advanced Drag and Drop Task Manager</title>
+  <style>
+    :root {
+      --bg: linear-gradient(135deg, #eef2ff 0%, #fdf2f8 50%, #eff6ff 100%);
+      --card: rgba(255, 255, 255, 0.85);
+      --border: rgba(148, 163, 184, 0.5);
+      --text: #0f172a;
+      --muted: #64748b;
+      --accent: #7c3aed;
+      --accent-2: #2563eb;
+      --success: #22c55e;
+      --shadow: 0 12px 30px rgba(15, 23, 42, 0.12);
+    }
+ 
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      padding: 32px 20px 64px;
+      font-family: "Inter", "Segoe UI", Arial, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+    }
+
+    .page {
+      max-width: 1100px;
+      margin: 0 auto;
+    }
+
+    h1 {
+      margin: 0 0 6px;
+      letter-spacing: -0.01em;
+    }
+
+    .subtitle {
+      margin: 0 0 20px;
+      color: var(--muted);
+      font-size: 15px;
+    }
+
+    .controls {
+      display: flex;
+      gap: 12px;
+      flex-wrap: wrap;
+      margin-bottom: 22px;
+    }
+
+    .controls input {
+      flex: 1 1 260px;
+      padding: 10px 12px;
+      font-size: 16px;
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      background: #fff;
+      box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.6);
+    }
+
+    .controls button {
+      padding: 10px 16px;
+      font-size: 16px;
+      border: none;
+      border-radius: 12px;
+      background: linear-gradient(135deg, var(--accent), var(--accent-2));
+      color: #fff;
+      cursor: pointer;
+      box-shadow: var(--shadow);
+      transition: transform 0.12s ease, filter 0.12s ease;
+    }
+
+    .controls button:hover { filter: brightness(1.03); }
+    .controls button:active { transform: translateY(1px) scale(0.99); }
+
+    .board {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+      gap: 18px;
+    }
+
+    .column {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 14px;
+      min-height: 280px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      box-shadow: var(--shadow);
+      backdrop-filter: blur(8px);
+    }
+
+    .column h2 {
+      margin: 2px 0 4px;
+      font-size: 18px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .badge {
+      padding: 2px 8px;
+      border-radius: 999px;
+      background: rgba(124, 58, 237, 0.1);
+      color: var(--accent);
+      font-size: 12px;
+      border: 1px solid rgba(124, 58, 237, 0.2);
+    }
+
+    .dropzone {
+      flex: 1;
+      padding: 8px;
+      border: 2px dashed transparent;
+      border-radius: 10px;
+      min-height: 220px;
+      transition: border-color 0.15s ease, background 0.15s ease, transform 0.12s ease;
+    }
+
+    .dropzone.highlight {
+      border-color: var(--accent);
+      background: rgba(37, 99, 235, 0.05);
+    }
+
+    .task {
+      background: linear-gradient(145deg, #ffffff, #f1f5f9);
+      border: 1px solid rgba(226, 232, 240, 0.9);
+      border-radius: 12px;
+      padding: 12px;
+      cursor: grab;
+      box-shadow: 0 10px 24px rgba(15, 23, 42, 0.08);
+      transition: transform 0.12s ease, box-shadow 0.15s ease;
+    }
+
+    .task:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 14px 30px rgba(15, 23, 42, 0.12);
+    }
+
+    .task .name { font-weight: 700; letter-spacing: -0.01em; }
+    .task .meta { color: var(--muted); font-size: 13px; margin-top: 6px; }
+
+    .task.completed {
+      background: linear-gradient(145deg, #ecfdf3, #dcfce7);
+      border-color: #bbf7d0;
+      color: #166534;
+    }
+
+    .message {
+      margin-top: 14px;
+      padding: 10px 12px;
+      border-radius: 10px;
+      background: #ecfdf3;
+      color: #166534;
+      border: 1px solid #bbf7d0;
+      display: none;
+    }
+
+    .message.show { display: block; }
+  </style>
+</head>
+<body>
+  <div class="page">
+    <h1>Advanced Drag and Drop Task Manager</h1>
+    <p class="subtitle">Create tasks, drag them across stages, and celebrate when they are done.</p>
+
+    <div class="controls">
+      <input id="taskInput" type="text" placeholder="Enter task name">
+      <button id="addBtn" type="button">Add Task</button>
+    </div>
+
+    <div class="board">
+      <div class="column">
+        <h2>To Do <span class="badge">Plan</span></h2>
+        <div class="dropzone" id="todo"></div>
+      </div>
+      <div class="column">
+        <h2>In Progress <span class="badge">Focus</span></h2>
+        <div class="dropzone" id="progress"></div>
+      </div>
+      <div class="column">
+        <h2>Completed <span class="badge">Done</span></h2>
+        <div class="dropzone" id="done"></div>
+      </div>
+    </div>
+
+    <div id="message" class="message">Task Completed Successfully</div>
+  </div>
+
+  <script>
+    const input = document.getElementById("taskInput");
+    const addBtn = document.getElementById("addBtn");
+    const message = document.getElementById("message");
+    const dropzones = document.querySelectorAll(".dropzone");
+    let counter = 0;
+
+    function formattedDate() {
+      return new Date().toLocaleDateString();
+    }
+
+    function createTaskCard(text) {
+      const card = document.createElement("div");
+      card.className = "task";
+      card.draggable = true;
+      card.id = `task-${++counter}`;
+      card.innerHTML = `
+        <div class="name">${text}</div>
+        <div class="meta">${formattedDate()}</div>
+      `;
+
+      card.addEventListener("dragstart", (e) => {
+        e.dataTransfer.setData("text/plain", card.id);
+        card.classList.add("dragging");
+      });
+
+      card.addEventListener("dragend", () => {
+        card.classList.remove("dragging");
+      });
+
+      return card;
+    }
+
+    function clearMessage() {
+      message.classList.remove("show");
+    }
+
+    function handleDrop(e) {
+      e.preventDefault();
+      const id = e.dataTransfer.getData("text/plain");
+      const card = document.getElementById(id);
+      if (!card) return;
+
+      this.appendChild(card);
+      dropzones.forEach((z) => z.classList.remove("highlight"));
+
+      if (this.id === "done") {
+        card.classList.add("completed");
+        message.classList.add("show");
+      } else {
+        card.classList.remove("completed");
+        clearMessage();
+      }
+    }
+
+    function setupDropzones() {
+      dropzones.forEach((zone) => {
+        zone.addEventListener("dragover", (e) => {
+          e.preventDefault();
+          zone.classList.add("highlight");
+        });
+        zone.addEventListener("dragleave", () => zone.classList.remove("highlight"));
+        zone.addEventListener("drop", handleDrop);
+      });
+    }
+
+    function addTask() {
+      const text = input.value.trim();
+      if (!text) {
+        input.focus();
+        return;
+      }
+      const card = createTaskCard(text);
+      document.getElementById("todo").appendChild(card);
+      input.value = "";
+      clearMessage();
+    }
+
+    addBtn.addEventListener("click", addTask);
+    input.addEventListener("keyup", (e) => {
+      if (e.key === "Enter") addTask();
+    });
+
+    setupDropzones();
+  </script>
+</body>
+</html>
+

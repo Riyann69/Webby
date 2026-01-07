@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>HTML5 Canvas</title>
+  <style>
+    :root {
+      --ink: #0f172a;
+      --panel: #0b1224;
+      --glow: #4a90e2;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: "Inter", "Segoe UI", system-ui, -apple-system, sans-serif;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+      margin: 0;
+      background: radial-gradient(circle at 20% 20%, #1f2937, #0b1020 55%);
+      color: #e5e7eb;
+    }
+
+    #canvasWrapper {
+      padding: 22px;
+      background: linear-gradient(145deg, #111827, #0b1224);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      box-shadow:
+        0 20px 50px rgba(0, 0, 0, 0.35),
+        0 0 0 1px rgba(255, 255, 255, 0.04),
+        inset 0 1px 0 rgba(255, 255, 255, 0.05);
+      border-radius: 14px;
+    }
+
+    canvas {
+      display: block;
+      border-radius: 10px;
+      background: radial-gradient(circle at 25% 25%, rgba(255,255,255,0.06), rgba(0,0,0,0.25)),
+                  linear-gradient(135deg, rgba(74,144,226,0.08), rgba(80,200,120,0.08));
+      box-shadow:
+        inset 0 0 0 1px rgba(255, 255, 255, 0.04),
+        0 10px 30px rgba(0, 0, 0, 0.25);
+    }
+  </style>
+</head>
+<body>
+  <div id="canvasWrapper">
+    <canvas id="myCanvas" width="500" height="300"></canvas>
+  </div>
+
+  <script>
+    const canvas = document.getElementById('myCanvas');
+    const ctx = canvas.getContext('2d');
+
+    function drawGrid(step = 25) {
+      ctx.save();
+      ctx.strokeStyle = 'rgba(255,255,255,0.06)';
+      ctx.lineWidth = 1;
+      for (let x = step; x < canvas.width; x += step) {
+        ctx.beginPath();
+        ctx.moveTo(x, 0);
+        ctx.lineTo(x, canvas.height);
+        ctx.stroke();
+      }
+      for (let y = step; y < canvas.height; y += step) {
+        ctx.beginPath();
+        ctx.moveTo(0, y);
+        ctx.lineTo(canvas.width, y);
+        ctx.stroke();
+      }
+      ctx.restore();
+    }
+
+    drawGrid();
+
+    ctx.save();
+    ctx.shadowColor = 'rgba(74, 144, 226, 0.4)';
+    ctx.shadowBlur = 16;
+    ctx.shadowOffsetY = 8;
+    ctx.fillStyle = '#4a90e2';
+    ctx.fillRect(40, 40, 170, 90);
+    ctx.restore();
+
+    ctx.save();
+    ctx.beginPath();
+    ctx.arc(390, 85, 50, 0, Math.PI * 2);
+    ctx.fillStyle = '#50c878';
+    ctx.shadowColor = 'rgba(80, 200, 120, 0.45)';
+    ctx.shadowBlur = 20;
+    ctx.fill();
+    ctx.restore();
+
+    const gradient = ctx.createLinearGradient(80, 220, 420, 220);
+    gradient.addColorStop(0, '#4a90e2');
+    gradient.addColorStop(1, '#50c878');
+    ctx.beginPath();
+    ctx.moveTo(80, 230);
+    ctx.lineTo(420, 230);
+    ctx.lineWidth = 6;
+    ctx.lineCap = 'round';
+    ctx.strokeStyle = gradient;
+    ctx.stroke();
+
+    ctx.fillStyle = '#e5e7eb';
+    ctx.font = '28px "Segoe UI", Arial, sans-serif';
+    ctx.shadowColor = 'rgba(0,0,0,0.35)';
+    ctx.shadowBlur = 8;
+    ctx.fillText('HTML5 Canvas', 160, 180);
+  </script>
+</body>
+</html>
