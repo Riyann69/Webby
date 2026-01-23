@@ -76,7 +76,6 @@
             box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
         }
 
-        /* Invalid input styling */
         input.invalid,
         select.invalid,
         textarea.invalid {
@@ -84,7 +83,6 @@
             background-color: #fff5f5;
         }
 
-        /* Valid input styling */
         input.valid,
         select.valid,
         textarea.valid {
@@ -193,7 +191,6 @@
             min-height: 80px;
         }
 
-        /* Animation for showing/hiding fields */
         .form-group {
             transition: opacity 0.3s ease, max-height 0.3s ease;
         }
@@ -218,14 +215,12 @@
                 <span class="error-message" id="nameError"></span>
             </div>
 
-            <!-- Email Field -->
             <div class="form-group">
                 <label for="email">Email <span class="required">*</span></label>
                 <input type="email" id="email" name="email" required>
                 <span class="error-message" id="emailError"></span>
             </div>
 
-            <!-- Password Field -->
             <div class="form-group">
                 <label for="password">Password <span class="required">*</span></label>
                 <input type="password" id="password" name="password" required>
@@ -233,21 +228,18 @@
                 <span class="error-message" id="passwordError"></span>
             </div>
 
-            <!-- Confirm Password Field -->
             <div class="form-group">
                 <label for="confirmPassword">Confirm Password <span class="required">*</span></label>
                 <input type="password" id="confirmPassword" name="confirmPassword" required>
                 <span class="error-message" id="confirmPasswordError"></span>
             </div>
 
-            <!-- Age Field -->
             <div class="form-group">
                 <label for="age">Age <span class="required">*</span></label>
                 <input type="number" id="age" name="age" min="1" max="120" required>
                 <span class="error-message" id="ageError"></span>
             </div>
 
-            <!-- Role Field -->
             <div class="form-group">
                 <label for="role">Role <span class="required">*</span></label>
                 <select id="role" name="role" required>
@@ -259,23 +251,19 @@
                 <span class="error-message" id="roleError"></span>
             </div>
 
-            <!-- Skills Field (shown conditionally) -->
             <div class="form-group" id="skillsGroup" style="display: none;">
                 <label for="skills">Skills <span class="required">*</span></label>
                 <textarea id="skills" name="skills" rows="3" placeholder="Enter your skills (comma-separated)"></textarea>
                 <span class="error-message" id="skillsError"></span>
             </div>
 
-            <!-- Role-specific validation info -->
             <div class="validation-info" id="validationInfo"></div>
 
-            <!-- Submit Button -->
             <button type="submit" id="submitBtn">Register</button>
         </form>
     </div>
 
     <script>
-        // Validation rules configuration based on role
         const validationRules = {
             student: {
                 password: {
@@ -330,7 +318,6 @@
             }
         };
 
-        // DOM elements
         const form = document.getElementById('registrationForm');
         const nameInput = document.getElementById('name');
         const emailInput = document.getElementById('email');
@@ -343,7 +330,6 @@
         const validationInfo = document.getElementById('validationInfo');
         const submitBtn = document.getElementById('submitBtn');
 
-        // Validation state
         let validationState = {
             name: false,
             email: false,
@@ -354,14 +340,12 @@
             skills: false
         };
 
-        // Initialize
         document.addEventListener('DOMContentLoaded', () => {
             setupEventListeners();
             updateValidationInfo();
             updateSubmitButton();
         });
 
-        // Setup event listeners
         function setupEventListeners() {
             nameInput.addEventListener('input', () => validateName());
             nameInput.addEventListener('blur', () => validateName());
@@ -385,7 +369,6 @@
                 validateRole();
                 updateValidationInfo();
                 toggleSkillsField();
-                // Re-validate all fields when role changes
                 validateName();
                 validateEmail();
                 validatePassword();
@@ -399,7 +382,6 @@
             form.addEventListener('submit', handleFormSubmit);
         }
 
-        // Validate name
         function validateName() {
             const name = nameInput.value.trim();
             const errorElement = document.getElementById('nameError');
@@ -422,7 +404,6 @@
             return validationState.name;
         }
 
-        // Validate email with domain checking
         function validateEmail() {
             const email = emailInput.value.trim();
             const errorElement = document.getElementById('emailError');
@@ -435,7 +416,6 @@
                 return false;
             }
             
-            // Basic email format validation
             const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
             if (!emailRegex.test(email)) {
                 showError(emailInput, errorElement, 'Please enter a valid email address');
@@ -444,7 +424,6 @@
                 return false;
             }
             
-            // Domain validation based on role
             if (role && validationRules[role]) {
                 const domain = email.split('@')[1];
                 const allowedDomains = validationRules[role].email.allowedDomains;
@@ -464,7 +443,6 @@
             return true;
         }
 
-        // Validate password strength
         function validatePassword() {
             const password = passwordInput.value;
             const errorElement = document.getElementById('passwordError');
@@ -479,7 +457,6 @@
                 return false;
             }
             
-            // Get validation rules for current role or default to student
             const rules = role && validationRules[role] 
                 ? validationRules[role].password 
                 : validationRules.student.password;
@@ -514,7 +491,6 @@
                 validationState.password = true;
             }
             
-            // Update password strength indicator
             const strength = calculatePasswordStrength(password);
             updatePasswordStrength(strengthElement, strength);
             
@@ -522,7 +498,6 @@
             return errors.length === 0;
         }
 
-        // Calculate password strength
         function calculatePasswordStrength(password) {
             let strength = 0;
             
@@ -537,7 +512,6 @@
             return 'strong';
         }
 
-        // Update password strength visual indicator
         function updatePasswordStrength(element, strength) {
             element.className = 'password-strength';
             if (strength !== 'none') {
@@ -548,7 +522,6 @@
             }
         }
 
-        // Validate confirm password
         function validateConfirmPassword() {
             const password = passwordInput.value;
             const confirmPassword = confirmPasswordInput.value;
@@ -574,7 +547,6 @@
             return true;
         }
 
-        // Validate age
         function validateAge() {
             const age = parseInt(ageInput.value);
             const errorElement = document.getElementById('ageError');
@@ -587,7 +559,6 @@
                 return false;
             }
             
-            // Get age rules for current role or default
             const rules = role && validationRules[role] 
                 ? validationRules[role].age 
                 : { min: 1, max: 120 };
@@ -606,7 +577,6 @@
             return true;
         }
 
-        // Validate role
         function validateRole() {
             const role = roleSelect.value;
             const errorElement = document.getElementById('roleError');
@@ -624,13 +594,11 @@
             return true;
         }
 
-        // Validate skills
         function validateSkills() {
             const skills = skillsInput.value.trim();
             const errorElement = document.getElementById('skillsError');
             const role = roleSelect.value;
             
-            // Check if skills are required for this role
             const skillsRequired = role && validationRules[role] 
                 ? validationRules[role].skillsRequired 
                 : false;
@@ -655,7 +623,6 @@
             return true;
         }
 
-        // Show error state
         function showError(input, errorElement, message) {
             input.classList.remove('valid');
             input.classList.add('invalid');
@@ -663,7 +630,6 @@
             errorElement.style.display = 'block';
         }
 
-        // Show success state
         function showSuccess(input, errorElement) {
             input.classList.remove('invalid');
             input.classList.add('valid');
@@ -671,7 +637,6 @@
             errorElement.style.display = 'none';
         }
 
-        // Update validation info based on role
         function updateValidationInfo() {
             const role = roleSelect.value;
             
@@ -703,7 +668,6 @@
             validationInfo.classList.add('show');
         }
 
-        // Toggle skills field based on role
         function toggleSkillsField() {
             const role = roleSelect.value;
             const skillsRequired = role && validationRules[role] 
@@ -717,23 +681,20 @@
                 skillsGroup.style.display = 'none';
                 skillsInput.removeAttribute('required');
                 skillsInput.value = '';
-                validationState.skills = true; // Set to true when not required
+                validationState.skills = true; 
             }
             
             updateSubmitButton();
         }
 
-        // Update submit button state
         function updateSubmitButton() {
             const allValid = Object.values(validationState).every(state => state === true);
             submitBtn.disabled = !allValid;
         }
 
-        // Handle form submission
         function handleFormSubmit(e) {
             e.preventDefault();
             
-            // Final validation check
             const isValid = 
                 validateName() &&
                 validateEmail() &&
@@ -748,7 +709,6 @@
                 return;
             }
             
-            // Form is valid, show success message
             const formData = {
                 name: nameInput.value.trim(),
                 email: emailInput.value.trim(),
@@ -761,10 +721,6 @@
             console.log('Form submitted successfully:', formData);
             alert('Registration successful! Check console for form data.');
             
-            // Optionally reset form
-            // form.reset();
-            // Object.keys(validationState).forEach(key => validationState[key] = false);
-            // updateSubmitButton();
         }
     </script>
 </body>

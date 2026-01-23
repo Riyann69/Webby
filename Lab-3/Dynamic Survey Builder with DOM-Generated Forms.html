@@ -93,7 +93,6 @@
             font-style: italic;
         }
 
-        /* Text Input Styling */
         .text-input {
             width: 100%;
             padding: 12px;
@@ -135,7 +134,6 @@
             color: #e74c3c;
         }
 
-        /* Radio and Checkbox Styling */
         .option-group {
             margin-top: 10px;
         }
@@ -184,7 +182,6 @@
             font-style: italic;
         }
 
-        /* Validation Messages */
         .validation-message {
             display: block;
             font-size: 12px;
@@ -213,7 +210,6 @@
             border-left: 3px solid #f39c12;
         }
 
-        /* Submit Button */
         .submit-section {
             margin-top: 40px;
             padding-top: 30px;
@@ -328,7 +324,6 @@
     </div>
 
     <script>
-        // Question structure with types and validation rules
         const questions = [
             {
                 id: 'q1',
@@ -435,7 +430,6 @@
             }
         ];
 
-        // Validation state
         const validationState = {};
 
         // Initialize survey
@@ -445,7 +439,6 @@
             updateProgress();
         });
 
-        // Generate form fields dynamically based on question type
         function generateSurveyForm() {
             const container = document.getElementById('questionsContainer');
             container.innerHTML = '';
@@ -467,7 +460,6 @@
                     questionHTML += `<div class="question-hint">${question.hint}</div>`;
                 }
 
-                // Generate field based on type
                 if (question.type === 'text') {
                     questionHTML += `
                         <input 
@@ -527,22 +519,18 @@
                 questionGroup.innerHTML = questionHTML;
                 container.appendChild(questionGroup);
 
-                // Initialize validation state
                 validationState[question.id] = !question.required;
             });
 
-            // Add event listeners
             setupFieldListeners();
         }
 
-        // Setup event listeners for form fields
         function setupFieldListeners() {
             questions.forEach(question => {
                 const field = document.getElementById(question.id);
                 const questionGroup = document.getElementById(`group-${question.id}`);
 
                 if (question.type === 'text') {
-                    // Text input listeners
                     if (field) {
                         field.addEventListener('input', () => {
                             validateField(question.id);
@@ -553,7 +541,6 @@
                         field.addEventListener('blur', () => validateField(question.id));
                     }
                 } else if (question.type === 'radio') {
-                    // Radio button listeners
                     question.options.forEach(option => {
                         const radioInput = document.getElementById(`${question.id}-${option.value}`);
                         if (radioInput) {
@@ -564,7 +551,6 @@
                         }
                     });
                 } else if (question.type === 'checkbox') {
-                    // Checkbox listeners
                     question.options.forEach(option => {
                         const checkboxInput = document.getElementById(`${question.id}-${option.value}`);
                         if (checkboxInput) {
@@ -578,7 +564,6 @@
             });
         }
 
-        // Validate individual field
         function validateField(questionId) {
             const question = questions.find(q => q.id === questionId);
             if (!question) return false;
@@ -592,22 +577,18 @@
             if (question.type === 'text') {
                 const value = field ? field.value.trim() : '';
                 
-                // Required validation
                 if (question.required && value.length === 0) {
                     isValid = false;
                     errorMessage = 'This field is required';
                 }
-                // Min length validation
                 else if (question.minLength && value.length > 0 && value.length < question.minLength) {
                     isValid = false;
                     errorMessage = `Minimum ${question.minLength} characters required`;
                 }
-                // Max length validation
                 else if (question.maxLength && value.length > question.maxLength) {
                     isValid = false;
                     errorMessage = `Maximum ${question.maxLength} characters allowed`;
                 }
-                // Pattern validation
                 else if (question.validation && question.validation.pattern && value.length > 0) {
                     if (!question.validation.pattern.test(value)) {
                         isValid = false;
@@ -637,7 +618,6 @@
                 }
             }
 
-            // Update UI
             if (field) {
                 field.classList.remove('invalid', 'valid');
                 if (field.value.length > 0 || question.type !== 'text') {
@@ -662,7 +642,6 @@
             return isValid;
         }
 
-        // Update character counter
         function updateCharCounter(questionId) {
             const field = document.getElementById(questionId);
             const counter = document.getElementById(`counter-${questionId}`);
@@ -684,7 +663,6 @@
             }
         }
 
-        // Update radio selection visual feedback
         function updateRadioSelection(questionId) {
             const selectedRadio = document.querySelector(`input[name="${questionId}"]:checked`);
             const optionItems = document.querySelectorAll(`#group-${questionId} .option-item`);
@@ -701,7 +679,6 @@
             }
         }
 
-        // Update checkbox selection counter and visual feedback
         function updateCheckboxSelection(questionId) {
             const checkedBoxes = document.querySelectorAll(`input[name="${questionId}"]:checked`);
             const selectionCounter = document.getElementById(`selection-counter-${questionId}`);
@@ -718,7 +695,6 @@
                 }
             }
 
-            // Update visual feedback
             const optionItems = document.querySelectorAll(`#group-${questionId} .option-item`);
             optionItems.forEach(item => {
                 const checkbox = item.querySelector('input[type="checkbox"]');
@@ -730,17 +706,14 @@
             });
         }
 
-        // Setup form validation
         function setupFormValidation() {
             const form = document.getElementById('surveyForm');
             form.addEventListener('submit', handleFormSubmit);
         }
 
-        // Handle form submission
         function handleFormSubmit(e) {
             e.preventDefault();
 
-            // Validate all fields
             let allValid = true;
             const errors = [];
 
@@ -754,7 +727,6 @@
 
             if (!allValid) {
                 showValidationSummary(errors);
-                // Scroll to first error
                 const firstInvalid = document.querySelector('.question-group.invalid');
                 if (firstInvalid) {
                     firstInvalid.scrollIntoView({ behavior: 'smooth', block: 'center' });
@@ -762,18 +734,11 @@
                 return;
             }
 
-            // Form is valid, collect data
             const formData = collectFormData();
             console.log('Survey submitted successfully:', formData);
             alert('Survey submitted successfully! Thank you for your feedback.\n\nCheck console for form data.');
-            
-            // Optionally reset form
-            // form.reset();
-            // questions.forEach(q => validationState[q.id] = !q.required);
-            // updateSubmitButton();
         }
 
-        // Collect form data
         function collectFormData() {
             const data = {};
             questions.forEach(question => {
@@ -791,7 +756,6 @@
             return data;
         }
 
-        // Show validation summary
         function showValidationSummary(errors) {
             const summary = document.getElementById('validationSummary');
             const errorList = document.getElementById('validationErrors');
@@ -809,14 +773,12 @@
             }
         }
 
-        // Update submit button state
         function updateSubmitButton() {
             const submitBtn = document.getElementById('submitBtn');
             const allValid = Object.values(validationState).every(state => state === true);
             submitBtn.disabled = !allValid;
         }
 
-        // Update progress bar
         function updateProgress() {
             const totalQuestions = questions.length;
             const validQuestions = Object.values(validationState).filter(state => state === true).length;
