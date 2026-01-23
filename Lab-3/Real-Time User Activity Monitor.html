@@ -431,7 +431,6 @@
         </div>
 
         <div class="main-content">
-            <!-- Activity Monitor Section -->
             <div class="monitor-section">
                 <h2>Activity Log</h2>
                 
@@ -447,7 +446,6 @@
                 </div>
             </div>
 
-            <!-- Statistics Section -->
             <div class="stats-section">
                 <h2>Statistics</h2>
                 
@@ -500,21 +498,18 @@
     </div>
 
     <script>
-        // Activity log array
         let activityLog = [];
         let isMonitoring = true;
         let startTime = Date.now();
 
-        // Activity thresholds
         const thresholds = {
             clicksPerMinute: 30,
             keypressesPerMinute: 100,
             eventsPerMinute: 150,
-            rapidClicks: 10, // clicks within 5 seconds
-            rapidKeypresses: 50 // keypresses within 10 seconds
+            rapidClicks: 10, 
+            rapidKeypresses: 50 
         };
 
-        // Statistics
         const stats = {
             clicks: 0,
             keypresses: 0,
@@ -522,39 +517,31 @@
             blur: 0
         };
 
-        // Time windows for rate calculation
         const timeWindows = {
             clicks: [],
             keypresses: [],
             events: []
         };
 
-        // Initialize monitoring
         document.addEventListener('DOMContentLoaded', () => {
             setupEventListeners();
             updateStatistics();
         });
 
-        // Setup event listeners with both capturing and bubbling phases
         function setupEventListeners() {
-            // Click events - using capturing phase
             document.addEventListener('click', handleClick, true); // Capturing phase
             document.addEventListener('click', handleClick, false); // Bubbling phase
 
-            // Keypress events - using capturing phase
             document.addEventListener('keydown', handleKeyPress, true); // Capturing phase
             document.addEventListener('keydown', handleKeyPress, false); // Bubbling phase
 
-            // Focus events
             document.addEventListener('focus', handleFocus, true);
             document.addEventListener('focusin', handleFocus, true);
 
-            // Blur events
             document.addEventListener('blur', handleBlur, true);
             document.addEventListener('focusout', handleBlur, true);
         }
 
-        // Handle click events
         function handleClick(event) {
             if (!isMonitoring) return;
 
@@ -583,7 +570,6 @@
             updateStatistics();
         }
 
-        // Handle keypress events
         function handleKeyPress(event) {
             if (!isMonitoring) return;
 
@@ -613,7 +599,6 @@
             updateStatistics();
         }
 
-        // Handle focus events
         function handleFocus(event) {
             if (!isMonitoring) return;
 
@@ -635,7 +620,6 @@
             updateStatistics();
         }
 
-        // Handle blur events
         function handleBlur(event) {
             if (!isMonitoring) return;
 
@@ -657,7 +641,6 @@
             updateStatistics();
         }
 
-        // Get target information
         function getTargetInfo(target) {
             return {
                 tagName: target.tagName,
@@ -668,18 +651,15 @@
             };
         }
 
-        // Log activity
         function logActivity(activity) {
             activityLog.push(activity);
             displayActivity(activity);
             cleanupOldActivities();
         }
 
-        // Display activity in the log
         function displayActivity(activity) {
             const logContainer = document.getElementById('activityLog');
             
-            // Remove empty message if present
             const emptyLog = logContainer.querySelector('.empty-log');
             if (emptyLog) {
                 emptyLog.remove();
@@ -738,56 +718,47 @@
 
             logContainer.insertBefore(activityItem, logContainer.firstChild);
 
-            // Keep only last 100 items visible for performance
             const items = logContainer.querySelectorAll('.activity-item');
             if (items.length > 100) {
                 items[items.length - 1].remove();
             }
         }
 
-        // Check for suspicious activity
         function checkSuspiciousActivity(type) {
             const now = Date.now();
             const warnings = [];
 
-            // Check clicks per minute
             const recentClicks = timeWindows.clicks.filter(time => now - time < 60000);
             const clicksPerMin = recentClicks.length;
             if (clicksPerMin > thresholds.clicksPerMinute) {
                 warnings.push(`High click rate: ${clicksPerMin} clicks per minute (threshold: ${thresholds.clicksPerMinute})`);
             }
 
-            // Check rapid clicks (within 5 seconds)
             const rapidClicks = timeWindows.clicks.filter(time => now - time < 5000);
             if (rapidClicks.length > thresholds.rapidClicks) {
                 warnings.push(`Rapid clicking detected: ${rapidClicks.length} clicks in 5 seconds`);
             }
 
-            // Check keypresses per minute
             const recentKeys = timeWindows.keypresses.filter(time => now - time < 60000);
             const keysPerMin = recentKeys.length;
             if (keysPerMin > thresholds.keypressesPerMinute) {
                 warnings.push(`High typing rate: ${keysPerMin} keypresses per minute (threshold: ${thresholds.keypressesPerMinute})`);
             }
 
-            // Check rapid keypresses (within 10 seconds)
             const rapidKeys = timeWindows.keypresses.filter(time => now - time < 10000);
             if (rapidKeys.length > thresholds.rapidKeypresses) {
                 warnings.push(`Rapid typing detected: ${rapidKeys.length} keypresses in 10 seconds`);
             }
 
-            // Check total events per minute
             const recentEvents = timeWindows.events.filter(time => now - time < 60000);
             const eventsPerMin = recentEvents.length;
             if (eventsPerMin > thresholds.eventsPerMinute) {
                 warnings.push(`High activity rate: ${eventsPerMin} events per minute (threshold: ${thresholds.eventsPerMinute})`);
             }
 
-            // Show warnings
             if (warnings.length > 0) {
                 showWarning(warnings, rapidClicks.length > thresholds.rapidClicks * 2 || rapidKeys.length > thresholds.rapidKeypresses * 2);
                 
-                // Mark recent activities as suspicious
                 const recentItems = document.querySelectorAll('.activity-item');
                 recentItems.forEach((item, index) => {
                     if (index < 5) {
@@ -797,7 +768,6 @@
             }
         }
 
-        // Show warning banner
         function showWarning(messages, critical = false) {
             const banner = document.getElementById('warningBanner');
             const title = document.getElementById('warningTitle');
@@ -819,7 +789,6 @@
             banner.classList.add('show');
         }
 
-        // Clear warnings
         function clearWarnings() {
             const banner = document.getElementById('warningBanner');
             banner.classList.remove('show');
@@ -830,14 +799,12 @@
             });
         }
 
-        // Update statistics
         function updateStatistics() {
             document.getElementById('totalClicks').textContent = stats.clicks;
             document.getElementById('totalKeypresses').textContent = stats.keypresses;
             document.getElementById('totalFocus').textContent = stats.focus + stats.blur;
             document.getElementById('totalActivities').textContent = activityLog.length;
 
-            // Calculate rates per minute
             const now = Date.now();
             const minutesElapsed = (now - startTime) / 60000 || 1;
 
@@ -850,20 +817,17 @@
             document.getElementById('eventsPerMin').textContent = eventsPerMin;
         }
 
-        // Cleanup old activities (keep last 500 in memory)
         function cleanupOldActivities() {
             if (activityLog.length > 500) {
                 activityLog = activityLog.slice(-500);
             }
 
-            // Cleanup time windows (keep last minute)
             const now = Date.now();
             timeWindows.clicks = timeWindows.clicks.filter(time => now - time < 60000);
             timeWindows.keypresses = timeWindows.keypresses.filter(time => now - time < 60000);
             timeWindows.events = timeWindows.events.filter(time => now - time < 60000);
         }
 
-        // Toggle monitoring
         function toggleMonitoring() {
             isMonitoring = !isMonitoring;
             const btn = document.getElementById('toggleBtn');
@@ -871,7 +835,6 @@
             btn.className = isMonitoring ? 'btn btn-primary' : 'btn btn-warning';
         }
 
-        // Reset log
         function resetLog() {
             if (confirm('Are you sure you want to reset the activity log? This cannot be undone.')) {
                 activityLog = [];
@@ -891,7 +854,6 @@
             }
         }
 
-        // Export log
         function exportLog() {
             if (activityLog.length === 0) {
                 alert('No activities to export.');
@@ -921,7 +883,6 @@
                 exportText += '\n';
             });
 
-            // Create download link
             const blob = new Blob([exportText], { type: 'text/plain' });
             const url = URL.createObjectURL(blob);
             const a = document.createElement('a');
@@ -937,4 +898,3 @@
     </script>
 </body>
 </html>
-

@@ -28,7 +28,6 @@
 
     h2 { margin-bottom: 15px; color: #333; }
 
-    /* Progress Bar */
     .progress-wrapper {
       background: #eee;
       border-radius: 10px;
@@ -101,7 +100,6 @@
       display: block;
     }
 
-    /* Buttons */
     .btn-group {
       display: flex;
       justify-content: space-between;
@@ -162,16 +160,13 @@
   <div class="container">
     <h2>Multi-Stage Form Workflow Engine</h2>
 
-    <!-- Progress Info -->
     <div class="step-indicator" id="stepIndicator">Step 1 of 4</div>
 
-    <!-- Progress Bar -->
     <div class="progress-wrapper">
       <div class="progress-bar" id="progressBar"></div>
     </div>
 
     <form id="multiForm">
-      <!-- Stage 1 -->
       <div class="stage active" id="stage1">
         <h3>Stage 1: Personal Details</h3><br>
 
@@ -188,7 +183,6 @@
         </div>
       </div>
 
-      <!-- Stage 2 -->
       <div class="stage" id="stage2">
         <h3>Stage 2: Contact Details</h3><br>
 
@@ -205,7 +199,6 @@
         </div>
       </div>
 
-      <!-- Stage 3 -->
       <div class="stage" id="stage3">
         <h3>Stage 3: Account Setup</h3><br>
 
@@ -224,7 +217,6 @@
         </div>
       </div>
 
-      <!-- Stage 4 -->
       <div class="stage" id="stage4">
         <h3>Stage 4: Confirm Details</h3><br>
 
@@ -233,7 +225,6 @@
         </div>
       </div>
 
-      <!-- Navigation Buttons -->
       <div class="btn-group">
         <button type="button" class="btn-prev" id="prevBtn" onclick="prevStage()">Previous</button>
         <button type="button" class="btn-next" id="nextBtn" onclick="nextStage()">Next</button>
@@ -245,7 +236,6 @@
   <script>
     let currentStage = 1;
 
-    // Temporary JS storage (Requirement #6)
     let formData = {
       fullName: "",
       age: "",
@@ -271,23 +261,19 @@
       }
       document.getElementById("stage" + stageNumber).classList.add("active");
 
-      // Update progress
       stepIndicator.textContent = `Step ${stageNumber} of ${totalStages}`;
       progressBar.style.width = ((stageNumber - 1) / (totalStages - 1)) * 100 + "%";
 
-      // Button visibility logic
       prevBtn.style.display = stageNumber === 1 ? "none" : "inline-block";
       nextBtn.style.display = stageNumber === totalStages ? "none" : "inline-block";
       submitBtn.style.display = stageNumber === totalStages ? "inline-block" : "none";
 
-      // If last stage, show summary
       if (stageNumber === 4) {
         updateSummary();
       }
     }
 
     function nextStage() {
-      // Requirement #2 + #5: move only if current stage valid
       if (validateStage(currentStage)) {
         saveStageData(currentStage);
         currentStage++;
@@ -302,7 +288,6 @@
       }
     }
 
-    // Save input values temporarily
     function saveStageData(stageNumber) {
       if (stageNumber === 1) {
         formData.fullName = document.getElementById("fullName").value.trim();
@@ -331,11 +316,9 @@
       `;
     }
 
-    // Validation for each stage
     function validateStage(stageNumber) {
       let isValid = true;
 
-      // Hide all errors first
       document.querySelectorAll(".error").forEach(err => err.classList.remove("show"));
 
       if (stageNumber === 1) {
@@ -375,7 +358,6 @@
         const username = document.getElementById("username").value.trim();
         const password = document.getElementById("password").value.trim();
 
-        // Password: 8+ chars, at least 1 uppercase and 1 number
         const passwordPattern = /^(?=.*[A-Z])(?=.*\d).{8,}$/;
 
         if (username.length < 5) {
@@ -392,11 +374,9 @@
       return isValid;
     }
 
-    // Prevent final submission if any stage fails validation
     form.addEventListener("submit", function (e) {
       e.preventDefault();
 
-      // Validate Stage 4 depends on all previous stages
       for (let i = 1; i <= 3; i++) {
         if (!validateStage(i)) {
           currentStage = i;
@@ -407,18 +387,15 @@
         saveStageData(i);
       }
 
-      // If all valid
       alert("Form submitted successfully!\n\n" + JSON.stringify(formData, null, 2));
       form.reset();
 
-      // Reset temp storage
       formData = { fullName: "", age: "", email: "", phone: "", username: "", password: "" };
 
       currentStage = 1;
       showStage(currentStage);
     });
 
-    // Initialize
     showStage(currentStage);
   </script>
 </body>
