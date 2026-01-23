@@ -1,0 +1,940 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Real-Time User Activity Monitor</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        h1 {
+            text-align: center;
+            color: white;
+            margin-bottom: 30px;
+            font-size: 32px;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+        }
+
+        .main-content {
+            display: grid;
+            grid-template-columns: 1fr 400px;
+            gap: 20px;
+        }
+
+        .monitor-section {
+            background: white;
+            border-radius: 15px;
+            padding: 25px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+        }
+
+        .stats-section {
+            background: white;
+            border-radius: 15px;
+            padding: 25px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+            height: fit-content;
+            position: sticky;
+            top: 20px;
+        }
+
+        h2 {
+            color: #333;
+            margin-bottom: 20px;
+            font-size: 24px;
+            border-bottom: 3px solid #667eea;
+            padding-bottom: 10px;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .stat-card {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 8px;
+            text-align: center;
+            border: 2px solid #e0e0e0;
+        }
+
+        .stat-value {
+            font-size: 28px;
+            font-weight: 700;
+            color: #667eea;
+            margin-bottom: 5px;
+        }
+
+        .stat-label {
+            font-size: 12px;
+            color: #666;
+            text-transform: uppercase;
+            font-weight: 500;
+        }
+
+        .thresholds-section {
+            margin-top: 20px;
+            padding: 15px;
+            background: #f8f9fa;
+            border-radius: 8px;
+        }
+
+        .threshold-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+            padding: 8px;
+            background: white;
+            border-radius: 5px;
+        }
+
+        .threshold-label {
+            font-size: 13px;
+            color: #333;
+        }
+
+        .threshold-value {
+            font-weight: 600;
+            color: #667eea;
+        }
+
+        .warning-banner {
+            background: #fff3cd;
+            border: 2px solid #ffc107;
+            border-radius: 8px;
+            padding: 15px;
+            margin-bottom: 20px;
+            display: none;
+            animation: shake 0.5s;
+        }
+
+        .warning-banner.show {
+            display: block;
+        }
+
+        .warning-banner.critical {
+            background: #f8d7da;
+            border-color: #dc3545;
+        }
+
+        .warning-title {
+            font-weight: 700;
+            color: #856404;
+            margin-bottom: 8px;
+            font-size: 16px;
+        }
+
+        .warning-title.critical {
+            color: #721c24;
+        }
+
+        .warning-message {
+            font-size: 14px;
+            color: #856404;
+        }
+
+        .warning-message.critical {
+            color: #721c24;
+        }
+
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-10px); }
+            75% { transform: translateX(10px); }
+        }
+
+        .controls {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+
+        .btn {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            flex: 1;
+            min-width: 120px;
+        }
+
+        .btn-primary {
+            background: #667eea;
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: #5568d3;
+            transform: translateY(-2px);
+        }
+
+        .btn-danger {
+            background: #e74c3c;
+            color: white;
+        }
+
+        .btn-danger:hover {
+            background: #c0392b;
+            transform: translateY(-2px);
+        }
+
+        .btn-success {
+            background: #27ae60;
+            color: white;
+        }
+
+        .btn-success:hover {
+            background: #229954;
+            transform: translateY(-2px);
+        }
+
+        .btn-warning {
+            background: #f39c12;
+            color: white;
+        }
+
+        .btn-warning:hover {
+            background: #e67e22;
+            transform: translateY(-2px);
+        }
+
+        .activity-log {
+            max-height: 600px;
+            overflow-y: auto;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            padding: 15px;
+            background: #f8f9fa;
+        }
+
+        .activity-item {
+            padding: 12px;
+            margin-bottom: 10px;
+            border-radius: 8px;
+            background: white;
+            border-left: 4px solid #667eea;
+            transition: all 0.2s ease;
+            animation: slideIn 0.3s ease;
+        }
+
+        .activity-item:hover {
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+            transform: translateX(5px);
+        }
+
+        .activity-item.click {
+            border-left-color: #3498db;
+        }
+
+        .activity-item.keypress {
+            border-left-color: #9b59b6;
+        }
+
+        .activity-item.focus {
+            border-left-color: #e67e22;
+        }
+
+        .activity-item.blur {
+            border-left-color: #95a5a6;
+        }
+
+        .activity-item.suspicious {
+            border-left-color: #e74c3c;
+            background: #fff5f5;
+            animation: pulse 1s infinite;
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(-10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.7; }
+        }
+
+        .activity-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 8px;
+        }
+
+        .activity-type {
+            font-weight: 700;
+            font-size: 14px;
+            text-transform: uppercase;
+            padding: 4px 10px;
+            border-radius: 4px;
+            color: white;
+        }
+
+        .activity-type.click {
+            background: #3498db;
+        }
+
+        .activity-type.keypress {
+            background: #9b59b6;
+        }
+
+        .activity-type.focus {
+            background: #e67e22;
+        }
+
+        .activity-type.blur {
+            background: #95a5a6;
+        }
+
+        .activity-time {
+            font-size: 11px;
+            color: #999;
+            font-family: 'Courier New', monospace;
+        }
+
+        .activity-details {
+            font-size: 13px;
+            color: #555;
+            margin-top: 5px;
+            line-height: 1.6;
+        }
+
+        .activity-target {
+            font-weight: 600;
+            color: #333;
+        }
+
+        .activity-key {
+            display: inline-block;
+            background: #e0e0e0;
+            padding: 2px 6px;
+            border-radius: 3px;
+            font-family: 'Courier New', monospace;
+            font-size: 12px;
+            margin: 0 2px;
+        }
+
+        .empty-log {
+            text-align: center;
+            padding: 40px;
+            color: #999;
+            font-style: italic;
+        }
+
+        .event-phase {
+            font-size: 11px;
+            color: #999;
+            margin-top: 5px;
+            font-style: italic;
+        }
+
+        .event-phase.bubbling {
+            color: #3498db;
+        }
+
+        .event-phase.capturing {
+            color: #e67e22;
+        }
+
+        .test-area {
+            background: white;
+            border-radius: 15px;
+            padding: 25px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+            margin-top: 20px;
+        }
+
+        .test-area h3 {
+            color: #333;
+            margin-bottom: 15px;
+        }
+
+        .test-button {
+            padding: 12px 24px;
+            margin: 5px;
+            background: #667eea;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: all 0.2s ease;
+        }
+
+        .test-button:hover {
+            background: #5568d3;
+            transform: scale(1.05);
+        }
+
+        .test-input {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 14px;
+            margin-top: 10px;
+        }
+
+        .test-input:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        @media (max-width: 768px) {
+            .main-content {
+                grid-template-columns: 1fr;
+            }
+
+            .stats-section {
+                position: static;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔍 Real-Time User Activity Monitor</h1>
+        
+        <div class="warning-banner" id="warningBanner">
+            <div class="warning-title" id="warningTitle">⚠️ Suspicious Activity Detected</div>
+            <div class="warning-message" id="warningMessage"></div>
+        </div>
+
+        <div class="main-content">
+            <!-- Activity Monitor Section -->
+            <div class="monitor-section">
+                <h2>Activity Log</h2>
+                
+                <div class="controls">
+                    <button class="btn btn-primary" onclick="toggleMonitoring()" id="toggleBtn">Pause Monitoring</button>
+                    <button class="btn btn-danger" onclick="resetLog()">Reset Log</button>
+                    <button class="btn btn-success" onclick="exportLog()">Export Log</button>
+                    <button class="btn btn-warning" onclick="clearWarnings()">Clear Warnings</button>
+                </div>
+
+                <div class="activity-log" id="activityLog">
+                    <div class="empty-log">No activity recorded yet. Start interacting with the page!</div>
+                </div>
+            </div>
+
+            <!-- Statistics Section -->
+            <div class="stats-section">
+                <h2>Statistics</h2>
+                
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <div class="stat-value" id="totalClicks">0</div>
+                        <div class="stat-label">Clicks</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-value" id="totalKeypresses">0</div>
+                        <div class="stat-label">Key Presses</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-value" id="totalFocus">0</div>
+                        <div class="stat-label">Focus Events</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-value" id="totalActivities">0</div>
+                        <div class="stat-label">Total Events</div>
+                    </div>
+                </div>
+
+                <div class="thresholds-section">
+                    <h3 style="font-size: 16px; margin-bottom: 15px; color: #333;">Activity Thresholds</h3>
+                    <div class="threshold-item">
+                        <span class="threshold-label">Clicks per minute:</span>
+                        <span class="threshold-value" id="clicksPerMin">0</span>
+                    </div>
+                    <div class="threshold-item">
+                        <span class="threshold-label">Key presses per minute:</span>
+                        <span class="threshold-value" id="keysPerMin">0</span>
+                    </div>
+                    <div class="threshold-item">
+                        <span class="threshold-label">Events per minute:</span>
+                        <span class="threshold-value" id="eventsPerMin">0</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Test Area -->
+        <div class="test-area">
+            <h3>Test Area - Interact here to generate activity</h3>
+            <button class="test-button" id="testBtn1">Click Me!</button>
+            <button class="test-button" id="testBtn2">Or Click Me!</button>
+            <button class="test-button" id="testBtn3">Try This One!</button>
+            <input type="text" class="test-input" id="testInput" placeholder="Type here to generate keypress events...">
+            <textarea class="test-input" id="testTextarea" rows="3" placeholder="Or type here..."></textarea>
+        </div>
+    </div>
+
+    <script>
+        // Activity log array
+        let activityLog = [];
+        let isMonitoring = true;
+        let startTime = Date.now();
+
+        // Activity thresholds
+        const thresholds = {
+            clicksPerMinute: 30,
+            keypressesPerMinute: 100,
+            eventsPerMinute: 150,
+            rapidClicks: 10, // clicks within 5 seconds
+            rapidKeypresses: 50 // keypresses within 10 seconds
+        };
+
+        // Statistics
+        const stats = {
+            clicks: 0,
+            keypresses: 0,
+            focus: 0,
+            blur: 0
+        };
+
+        // Time windows for rate calculation
+        const timeWindows = {
+            clicks: [],
+            keypresses: [],
+            events: []
+        };
+
+        // Initialize monitoring
+        document.addEventListener('DOMContentLoaded', () => {
+            setupEventListeners();
+            updateStatistics();
+        });
+
+        // Setup event listeners with both capturing and bubbling phases
+        function setupEventListeners() {
+            // Click events - using capturing phase
+            document.addEventListener('click', handleClick, true); // Capturing phase
+            document.addEventListener('click', handleClick, false); // Bubbling phase
+
+            // Keypress events - using capturing phase
+            document.addEventListener('keydown', handleKeyPress, true); // Capturing phase
+            document.addEventListener('keydown', handleKeyPress, false); // Bubbling phase
+
+            // Focus events
+            document.addEventListener('focus', handleFocus, true);
+            document.addEventListener('focusin', handleFocus, true);
+
+            // Blur events
+            document.addEventListener('blur', handleBlur, true);
+            document.addEventListener('focusout', handleBlur, true);
+        }
+
+        // Handle click events
+        function handleClick(event) {
+            if (!isMonitoring) return;
+
+            const phase = event.eventPhase === 1 ? 'capturing' : 'bubbling';
+            const target = event.target;
+            const targetInfo = getTargetInfo(target);
+
+            const activity = {
+                id: Date.now() + Math.random(),
+                type: 'click',
+                timestamp: new Date(),
+                target: targetInfo,
+                phase: phase,
+                x: event.clientX,
+                y: event.clientY,
+                button: event.button,
+                ctrlKey: event.ctrlKey,
+                shiftKey: event.shiftKey,
+                altKey: event.altKey
+            };
+
+            logActivity(activity);
+            stats.clicks++;
+            timeWindows.clicks.push(Date.now());
+            checkSuspiciousActivity('click');
+            updateStatistics();
+        }
+
+        // Handle keypress events
+        function handleKeyPress(event) {
+            if (!isMonitoring) return;
+
+            const phase = event.eventPhase === 1 ? 'capturing' : 'bubbling';
+            const target = event.target;
+            const targetInfo = getTargetInfo(target);
+
+            const activity = {
+                id: Date.now() + Math.random(),
+                type: 'keypress',
+                timestamp: new Date(),
+                target: targetInfo,
+                phase: phase,
+                key: event.key,
+                code: event.code,
+                keyCode: event.keyCode,
+                ctrlKey: event.ctrlKey,
+                shiftKey: event.shiftKey,
+                altKey: event.altKey,
+                metaKey: event.metaKey
+            };
+
+            logActivity(activity);
+            stats.keypresses++;
+            timeWindows.keypresses.push(Date.now());
+            checkSuspiciousActivity('keypress');
+            updateStatistics();
+        }
+
+        // Handle focus events
+        function handleFocus(event) {
+            if (!isMonitoring) return;
+
+            const phase = event.eventPhase === 1 ? 'capturing' : 'bubbling';
+            const target = event.target;
+            const targetInfo = getTargetInfo(target);
+
+            const activity = {
+                id: Date.now() + Math.random(),
+                type: 'focus',
+                timestamp: new Date(),
+                target: targetInfo,
+                phase: phase
+            };
+
+            logActivity(activity);
+            stats.focus++;
+            timeWindows.events.push(Date.now());
+            updateStatistics();
+        }
+
+        // Handle blur events
+        function handleBlur(event) {
+            if (!isMonitoring) return;
+
+            const phase = event.eventPhase === 1 ? 'capturing' : 'bubbling';
+            const target = event.target;
+            const targetInfo = getTargetInfo(target);
+
+            const activity = {
+                id: Date.now() + Math.random(),
+                type: 'blur',
+                timestamp: new Date(),
+                target: targetInfo,
+                phase: phase
+            };
+
+            logActivity(activity);
+            stats.blur++;
+            timeWindows.events.push(Date.now());
+            updateStatistics();
+        }
+
+        // Get target information
+        function getTargetInfo(target) {
+            return {
+                tagName: target.tagName,
+                id: target.id || 'none',
+                className: target.className || 'none',
+                type: target.type || 'none',
+                textContent: target.textContent ? target.textContent.substring(0, 50) : 'none'
+            };
+        }
+
+        // Log activity
+        function logActivity(activity) {
+            activityLog.push(activity);
+            displayActivity(activity);
+            cleanupOldActivities();
+        }
+
+        // Display activity in the log
+        function displayActivity(activity) {
+            const logContainer = document.getElementById('activityLog');
+            
+            // Remove empty message if present
+            const emptyLog = logContainer.querySelector('.empty-log');
+            if (emptyLog) {
+                emptyLog.remove();
+            }
+
+            const activityItem = document.createElement('div');
+            activityItem.className = `activity-item ${activity.type}`;
+            activityItem.id = `activity-${activity.id}`;
+
+            const timeString = activity.timestamp.toLocaleTimeString() + '.' + 
+                              activity.timestamp.getMilliseconds().toString().padStart(3, '0');
+
+            let detailsHTML = '';
+
+            if (activity.type === 'click') {
+                detailsHTML = `
+                    <div class="activity-details">
+                        Target: <span class="activity-target">${activity.target.tagName}</span>
+                        ${activity.target.id !== 'none' ? `(ID: ${activity.target.id})` : ''}
+                        ${activity.target.className !== 'none' ? `(Class: ${activity.target.className})` : ''}
+                        <br>Position: (${activity.x}, ${activity.y})
+                        ${activity.button !== 0 ? `<br>Button: ${activity.button}` : ''}
+                        ${activity.ctrlKey || activity.shiftKey || activity.altKey ? 
+                            `<br>Modifiers: ${activity.ctrlKey ? 'Ctrl ' : ''}${activity.shiftKey ? 'Shift ' : ''}${activity.altKey ? 'Alt' : ''}` : ''}
+                    </div>
+                `;
+            } else if (activity.type === 'keypress') {
+                detailsHTML = `
+                    <div class="activity-details">
+                        Target: <span class="activity-target">${activity.target.tagName}</span>
+                        ${activity.target.id !== 'none' ? `(ID: ${activity.target.id})` : ''}
+                        <br>Key: <span class="activity-key">${activity.key}</span>
+                        Code: <span class="activity-key">${activity.code}</span>
+                        ${activity.ctrlKey || activity.shiftKey || activity.altKey || activity.metaKey ? 
+                            `<br>Modifiers: ${activity.ctrlKey ? 'Ctrl ' : ''}${activity.shiftKey ? 'Shift ' : ''}${activity.altKey ? 'Alt ' : ''}${activity.metaKey ? 'Meta' : ''}` : ''}
+                    </div>
+                `;
+            } else {
+                detailsHTML = `
+                    <div class="activity-details">
+                        Target: <span class="activity-target">${activity.target.tagName}</span>
+                        ${activity.target.id !== 'none' ? `(ID: ${activity.target.id})` : ''}
+                        ${activity.target.className !== 'none' ? `(Class: ${activity.target.className})` : ''}
+                    </div>
+                `;
+            }
+
+            activityItem.innerHTML = `
+                <div class="activity-header">
+                    <span class="activity-type ${activity.type}">${activity.type}</span>
+                    <span class="activity-time">${timeString}</span>
+                </div>
+                ${detailsHTML}
+                <div class="event-phase ${activity.phase}">Phase: ${activity.phase}</div>
+            `;
+
+            logContainer.insertBefore(activityItem, logContainer.firstChild);
+
+            // Keep only last 100 items visible for performance
+            const items = logContainer.querySelectorAll('.activity-item');
+            if (items.length > 100) {
+                items[items.length - 1].remove();
+            }
+        }
+
+        // Check for suspicious activity
+        function checkSuspiciousActivity(type) {
+            const now = Date.now();
+            const warnings = [];
+
+            // Check clicks per minute
+            const recentClicks = timeWindows.clicks.filter(time => now - time < 60000);
+            const clicksPerMin = recentClicks.length;
+            if (clicksPerMin > thresholds.clicksPerMinute) {
+                warnings.push(`High click rate: ${clicksPerMin} clicks per minute (threshold: ${thresholds.clicksPerMinute})`);
+            }
+
+            // Check rapid clicks (within 5 seconds)
+            const rapidClicks = timeWindows.clicks.filter(time => now - time < 5000);
+            if (rapidClicks.length > thresholds.rapidClicks) {
+                warnings.push(`Rapid clicking detected: ${rapidClicks.length} clicks in 5 seconds`);
+            }
+
+            // Check keypresses per minute
+            const recentKeys = timeWindows.keypresses.filter(time => now - time < 60000);
+            const keysPerMin = recentKeys.length;
+            if (keysPerMin > thresholds.keypressesPerMinute) {
+                warnings.push(`High typing rate: ${keysPerMin} keypresses per minute (threshold: ${thresholds.keypressesPerMinute})`);
+            }
+
+            // Check rapid keypresses (within 10 seconds)
+            const rapidKeys = timeWindows.keypresses.filter(time => now - time < 10000);
+            if (rapidKeys.length > thresholds.rapidKeypresses) {
+                warnings.push(`Rapid typing detected: ${rapidKeys.length} keypresses in 10 seconds`);
+            }
+
+            // Check total events per minute
+            const recentEvents = timeWindows.events.filter(time => now - time < 60000);
+            const eventsPerMin = recentEvents.length;
+            if (eventsPerMin > thresholds.eventsPerMinute) {
+                warnings.push(`High activity rate: ${eventsPerMin} events per minute (threshold: ${thresholds.eventsPerMinute})`);
+            }
+
+            // Show warnings
+            if (warnings.length > 0) {
+                showWarning(warnings, rapidClicks.length > thresholds.rapidClicks * 2 || rapidKeys.length > thresholds.rapidKeypresses * 2);
+                
+                // Mark recent activities as suspicious
+                const recentItems = document.querySelectorAll('.activity-item');
+                recentItems.forEach((item, index) => {
+                    if (index < 5) {
+                        item.classList.add('suspicious');
+                    }
+                });
+            }
+        }
+
+        // Show warning banner
+        function showWarning(messages, critical = false) {
+            const banner = document.getElementById('warningBanner');
+            const title = document.getElementById('warningTitle');
+            const message = document.getElementById('warningMessage');
+
+            if (critical) {
+                banner.classList.add('critical');
+                title.classList.add('critical');
+                title.textContent = '🚨 CRITICAL: Suspicious Activity Detected';
+                message.classList.add('critical');
+            } else {
+                banner.classList.remove('critical');
+                title.classList.remove('critical');
+                title.textContent = '⚠️ Suspicious Activity Detected';
+                message.classList.remove('critical');
+            }
+
+            message.textContent = messages.join(' | ');
+            banner.classList.add('show');
+        }
+
+        // Clear warnings
+        function clearWarnings() {
+            const banner = document.getElementById('warningBanner');
+            banner.classList.remove('show');
+            
+            // Remove suspicious class from items
+            document.querySelectorAll('.activity-item.suspicious').forEach(item => {
+                item.classList.remove('suspicious');
+            });
+        }
+
+        // Update statistics
+        function updateStatistics() {
+            document.getElementById('totalClicks').textContent = stats.clicks;
+            document.getElementById('totalKeypresses').textContent = stats.keypresses;
+            document.getElementById('totalFocus').textContent = stats.focus + stats.blur;
+            document.getElementById('totalActivities').textContent = activityLog.length;
+
+            // Calculate rates per minute
+            const now = Date.now();
+            const minutesElapsed = (now - startTime) / 60000 || 1;
+
+            const clicksPerMin = Math.round(stats.clicks / minutesElapsed);
+            const keysPerMin = Math.round(stats.keypresses / minutesElapsed);
+            const eventsPerMin = Math.round(activityLog.length / minutesElapsed);
+
+            document.getElementById('clicksPerMin').textContent = clicksPerMin;
+            document.getElementById('keysPerMin').textContent = keysPerMin;
+            document.getElementById('eventsPerMin').textContent = eventsPerMin;
+        }
+
+        // Cleanup old activities (keep last 500 in memory)
+        function cleanupOldActivities() {
+            if (activityLog.length > 500) {
+                activityLog = activityLog.slice(-500);
+            }
+
+            // Cleanup time windows (keep last minute)
+            const now = Date.now();
+            timeWindows.clicks = timeWindows.clicks.filter(time => now - time < 60000);
+            timeWindows.keypresses = timeWindows.keypresses.filter(time => now - time < 60000);
+            timeWindows.events = timeWindows.events.filter(time => now - time < 60000);
+        }
+
+        // Toggle monitoring
+        function toggleMonitoring() {
+            isMonitoring = !isMonitoring;
+            const btn = document.getElementById('toggleBtn');
+            btn.textContent = isMonitoring ? 'Pause Monitoring' : 'Resume Monitoring';
+            btn.className = isMonitoring ? 'btn btn-primary' : 'btn btn-warning';
+        }
+
+        // Reset log
+        function resetLog() {
+            if (confirm('Are you sure you want to reset the activity log? This cannot be undone.')) {
+                activityLog = [];
+                stats.clicks = 0;
+                stats.keypresses = 0;
+                stats.focus = 0;
+                stats.blur = 0;
+                timeWindows.clicks = [];
+                timeWindows.keypresses = [];
+                timeWindows.events = [];
+                startTime = Date.now();
+                
+                document.getElementById('activityLog').innerHTML = 
+                    '<div class="empty-log">No activity recorded yet. Start interacting with the page!</div>';
+                clearWarnings();
+                updateStatistics();
+            }
+        }
+
+        // Export log
+        function exportLog() {
+            if (activityLog.length === 0) {
+                alert('No activities to export.');
+                return;
+            }
+
+            let exportText = '=== USER ACTIVITY LOG ===\n';
+            exportText += `Generated: ${new Date().toLocaleString()}\n`;
+            exportText += `Total Activities: ${activityLog.length}\n`;
+            exportText += `Clicks: ${stats.clicks} | Keypresses: ${stats.keypresses} | Focus Events: ${stats.focus + stats.blur}\n`;
+            exportText += '='.repeat(50) + '\n\n';
+
+            activityLog.forEach((activity, index) => {
+                exportText += `[${index + 1}] ${activity.type.toUpperCase()} - ${activity.timestamp.toLocaleString()}\n`;
+                exportText += `  Phase: ${activity.phase}\n`;
+                exportText += `  Target: ${activity.target.tagName}`;
+                if (activity.target.id !== 'none') exportText += ` (ID: ${activity.target.id})`;
+                if (activity.target.className !== 'none') exportText += ` (Class: ${activity.target.className})`;
+                exportText += '\n';
+
+                if (activity.type === 'click') {
+                    exportText += `  Position: (${activity.x}, ${activity.y})\n`;
+                } else if (activity.type === 'keypress') {
+                    exportText += `  Key: ${activity.key} | Code: ${activity.code}\n`;
+                }
+
+                exportText += '\n';
+            });
+
+            // Create download link
+            const blob = new Blob([exportText], { type: 'text/plain' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `activity-log-${Date.now()}.txt`;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+
+            alert('Activity log exported successfully!');
+        }
+    </script>
+</body>
+</html>
+

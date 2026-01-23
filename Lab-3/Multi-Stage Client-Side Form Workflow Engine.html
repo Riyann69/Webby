@@ -1,0 +1,425 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Multi-Stage Form Workflow Engine</title>
+
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: Arial, sans-serif; }
+
+    body {
+      min-height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      background: linear-gradient(135deg, #667eea, #764ba2);
+      padding: 20px;
+    }
+
+    .container {
+      width: 100%;
+      max-width: 700px;
+      background: white;
+      padding: 25px;
+      border-radius: 12px;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+    }
+
+    h2 { margin-bottom: 15px; color: #333; }
+
+    /* Progress Bar */
+    .progress-wrapper {
+      background: #eee;
+      border-radius: 10px;
+      overflow: hidden;
+      height: 12px;
+      margin-bottom: 20px;
+    }
+
+    .progress-bar {
+      height: 12px;
+      width: 0%;
+      background: #667eea;
+      transition: width 0.3s ease;
+    }
+
+    .step-indicator {
+      margin-bottom: 20px;
+      font-size: 14px;
+      color: #444;
+      font-weight: bold;
+    }
+
+    /* Stages */
+    .stage {
+      display: none;
+      animation: fadeIn 0.3s ease;
+    }
+
+    .stage.active {
+      display: block;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .field {
+      margin-bottom: 15px;
+    }
+
+    label {
+      display: block;
+      margin-bottom: 6px;
+      font-weight: bold;
+      color: #333;
+    }
+
+    input, select {
+      width: 100%;
+      padding: 10px;
+      border: 2px solid #ddd;
+      border-radius: 8px;
+      outline: none;
+      font-size: 14px;
+    }
+
+    input:focus, select:focus {
+      border-color: #667eea;
+    }
+
+    .error {
+      margin-top: 5px;
+      color: #d63031;
+      font-size: 13px;
+      display: none;
+    }
+
+    .error.show {
+      display: block;
+    }
+
+    /* Buttons */
+    .btn-group {
+      display: flex;
+      justify-content: space-between;
+      margin-top: 20px;
+      gap: 10px;
+    }
+
+    button {
+      padding: 10px 18px;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      font-weight: bold;
+      font-size: 14px;
+      transition: 0.2s;
+    }
+
+    .btn-prev {
+      background: #777;
+      color: white;
+    }
+
+    .btn-prev:hover {
+      background: #555;
+    }
+
+    .btn-next {
+      background: #667eea;
+      color: white;
+    }
+
+    .btn-next:hover {
+      background: #4c5fd6;
+    }
+
+    .btn-submit {
+      background: #27ae60;
+      color: white;
+    }
+
+    .btn-submit:hover {
+      background: #219150;
+    }
+
+    .summary {
+      background: #f7f7ff;
+      padding: 15px;
+      border-radius: 10px;
+      border: 1px solid #ddd;
+      line-height: 1.7;
+      color: #333;
+      font-size: 14px;
+    }
+  </style>
+</head>
+
+<body>
+  <div class="container">
+    <h2>Multi-Stage Form Workflow Engine</h2>
+
+    <!-- Progress Info -->
+    <div class="step-indicator" id="stepIndicator">Step 1 of 4</div>
+
+    <!-- Progress Bar -->
+    <div class="progress-wrapper">
+      <div class="progress-bar" id="progressBar"></div>
+    </div>
+
+    <form id="multiForm">
+      <!-- Stage 1 -->
+      <div class="stage active" id="stage1">
+        <h3>Stage 1: Personal Details</h3><br>
+
+        <div class="field">
+          <label>Full Name</label>
+          <input type="text" id="fullName" placeholder="Enter your name" />
+          <div class="error" id="errFullName">Name must be at least 3 characters.</div>
+        </div>
+
+        <div class="field">
+          <label>Age</label>
+          <input type="number" id="age" placeholder="Enter your age" />
+          <div class="error" id="errAge">Age must be between 18 and 60.</div>
+        </div>
+      </div>
+
+      <!-- Stage 2 -->
+      <div class="stage" id="stage2">
+        <h3>Stage 2: Contact Details</h3><br>
+
+        <div class="field">
+          <label>Email</label>
+          <input type="text" id="email" placeholder="Enter your email" />
+          <div class="error" id="errEmail">Enter a valid email address.</div>
+        </div>
+
+        <div class="field">
+          <label>Phone Number</label>
+          <input type="text" id="phone" placeholder="10-digit phone number" />
+          <div class="error" id="errPhone">Phone must be exactly 10 digits.</div>
+        </div>
+      </div>
+
+      <!-- Stage 3 -->
+      <div class="stage" id="stage3">
+        <h3>Stage 3: Account Setup</h3><br>
+
+        <div class="field">
+          <label>Username</label>
+          <input type="text" id="username" placeholder="Choose username" />
+          <div class="error" id="errUsername">Username must be at least 5 characters.</div>
+        </div>
+
+        <div class="field">
+          <label>Password</label>
+          <input type="password" id="password" placeholder="Choose password" />
+          <div class="error" id="errPassword">
+            Password must be 8+ chars and include 1 uppercase, 1 number.
+          </div>
+        </div>
+      </div>
+
+      <!-- Stage 4 -->
+      <div class="stage" id="stage4">
+        <h3>Stage 4: Confirm Details</h3><br>
+
+        <div class="summary" id="summaryBox">
+          Loading summary...
+        </div>
+      </div>
+
+      <!-- Navigation Buttons -->
+      <div class="btn-group">
+        <button type="button" class="btn-prev" id="prevBtn" onclick="prevStage()">Previous</button>
+        <button type="button" class="btn-next" id="nextBtn" onclick="nextStage()">Next</button>
+        <button type="submit" class="btn-submit" id="submitBtn">Submit</button>
+      </div>
+    </form>
+  </div>
+
+  <script>
+    let currentStage = 1;
+
+    // Temporary JS storage (Requirement #6)
+    let formData = {
+      fullName: "",
+      age: "",
+      email: "",
+      phone: "",
+      username: "",
+      password: ""
+    };
+
+    const totalStages = 4;
+
+    const form = document.getElementById("multiForm");
+    const progressBar = document.getElementById("progressBar");
+    const stepIndicator = document.getElementById("stepIndicator");
+
+    const prevBtn = document.getElementById("prevBtn");
+    const nextBtn = document.getElementById("nextBtn");
+    const submitBtn = document.getElementById("submitBtn");
+
+    function showStage(stageNumber) {
+      for (let i = 1; i <= totalStages; i++) {
+        document.getElementById("stage" + i).classList.remove("active");
+      }
+      document.getElementById("stage" + stageNumber).classList.add("active");
+
+      // Update progress
+      stepIndicator.textContent = `Step ${stageNumber} of ${totalStages}`;
+      progressBar.style.width = ((stageNumber - 1) / (totalStages - 1)) * 100 + "%";
+
+      // Button visibility logic
+      prevBtn.style.display = stageNumber === 1 ? "none" : "inline-block";
+      nextBtn.style.display = stageNumber === totalStages ? "none" : "inline-block";
+      submitBtn.style.display = stageNumber === totalStages ? "inline-block" : "none";
+
+      // If last stage, show summary
+      if (stageNumber === 4) {
+        updateSummary();
+      }
+    }
+
+    function nextStage() {
+      // Requirement #2 + #5: move only if current stage valid
+      if (validateStage(currentStage)) {
+        saveStageData(currentStage);
+        currentStage++;
+        showStage(currentStage);
+      }
+    }
+
+    function prevStage() {
+      if (currentStage > 1) {
+        currentStage--;
+        showStage(currentStage);
+      }
+    }
+
+    // Save input values temporarily
+    function saveStageData(stageNumber) {
+      if (stageNumber === 1) {
+        formData.fullName = document.getElementById("fullName").value.trim();
+        formData.age = document.getElementById("age").value.trim();
+      }
+      if (stageNumber === 2) {
+        formData.email = document.getElementById("email").value.trim();
+        formData.phone = document.getElementById("phone").value.trim();
+      }
+      if (stageNumber === 3) {
+        formData.username = document.getElementById("username").value.trim();
+        formData.password = document.getElementById("password").value.trim();
+      }
+    }
+
+    function updateSummary() {
+      const summaryBox = document.getElementById("summaryBox");
+
+      summaryBox.innerHTML = `
+        <b>Full Name:</b> ${formData.fullName}<br>
+        <b>Age:</b> ${formData.age}<br>
+        <b>Email:</b> ${formData.email}<br>
+        <b>Phone:</b> ${formData.phone}<br>
+        <b>Username:</b> ${formData.username}<br>
+        <b>Password:</b> ${"*".repeat(formData.password.length)}<br>
+      `;
+    }
+
+    // Validation for each stage
+    function validateStage(stageNumber) {
+      let isValid = true;
+
+      // Hide all errors first
+      document.querySelectorAll(".error").forEach(err => err.classList.remove("show"));
+
+      if (stageNumber === 1) {
+        const fullName = document.getElementById("fullName").value.trim();
+        const age = parseInt(document.getElementById("age").value.trim(), 10);
+
+        if (fullName.length < 3) {
+          document.getElementById("errFullName").classList.add("show");
+          isValid = false;
+        }
+
+        if (isNaN(age) || age < 18 || age > 60) {
+          document.getElementById("errAge").classList.add("show");
+          isValid = false;
+        }
+      }
+
+      if (stageNumber === 2) {
+        const email = document.getElementById("email").value.trim();
+        const phone = document.getElementById("phone").value.trim();
+
+        const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        const phonePattern = /^[0-9]{10}$/;
+
+        if (!emailPattern.test(email)) {
+          document.getElementById("errEmail").classList.add("show");
+          isValid = false;
+        }
+
+        if (!phonePattern.test(phone)) {
+          document.getElementById("errPhone").classList.add("show");
+          isValid = false;
+        }
+      }
+
+      if (stageNumber === 3) {
+        const username = document.getElementById("username").value.trim();
+        const password = document.getElementById("password").value.trim();
+
+        // Password: 8+ chars, at least 1 uppercase and 1 number
+        const passwordPattern = /^(?=.*[A-Z])(?=.*\d).{8,}$/;
+
+        if (username.length < 5) {
+          document.getElementById("errUsername").classList.add("show");
+          isValid = false;
+        }
+
+        if (!passwordPattern.test(password)) {
+          document.getElementById("errPassword").classList.add("show");
+          isValid = false;
+        }
+      }
+
+      return isValid;
+    }
+
+    // Prevent final submission if any stage fails validation
+    form.addEventListener("submit", function (e) {
+      e.preventDefault();
+
+      // Validate Stage 4 depends on all previous stages
+      for (let i = 1; i <= 3; i++) {
+        if (!validateStage(i)) {
+          currentStage = i;
+          showStage(currentStage);
+          alert("Form submission blocked. Please fix errors in Step " + i);
+          return;
+        }
+        saveStageData(i);
+      }
+
+      // If all valid
+      alert("Form submitted successfully!\n\n" + JSON.stringify(formData, null, 2));
+      form.reset();
+
+      // Reset temp storage
+      formData = { fullName: "", age: "", email: "", phone: "", username: "", password: "" };
+
+      currentStage = 1;
+      showStage(currentStage);
+    });
+
+    // Initialize
+    showStage(currentStage);
+  </script>
+</body>
+</html>
