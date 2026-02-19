@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AJAX Weather Dashboard</title>
+
+<style>
+* { margin:0; padding:0; box-sizing:border-box; }
+
+body {
+    font-family: 'Segoe UI', sans-serif;
+    background: linear-gradient(135deg, #2193b0, #6dd5ed);
+    min-height:100vh;
+    padding:30px;
+}
+
+.container {
+    max-width:900px;
+    margin:auto;
+}
+
+h1 {
+    text-align:center;
+    color:white;
+    margin-bottom:30px;
+}
+
+.dashboard {
+    background:white;
+    padding:25px;
+    border-radius:15px;
+    box-shadow:0 10px 30px rgba(0,0,0,0.2);
+}
+
+input {
+    width:100%;
+    padding:12px;
+    border-radius:8px;
+    border:2px solid #ccc;
+    font-size:14px;
+}
+
+input:focus {
+    outline:none;
+    border-color:#2193b0;
+}
+
+button {
+    padding:10px 15px;
+    margin-top:10px;
+    border:none;
+    border-radius:6px;
+    background:#2193b0;
+    color:white;
+    cursor:pointer;
+    font-weight:600;
+}
+
+.weather-card {
+    margin-top:20px;
+    padding:20px;
+    background:#f4f9fb;
+    border-radius:12px;
+    text-align:center;
+    display:none;
+}
+
+.weather-value {
+    font-size:22px;
+    font-weight:bold;
+    margin:5px 0;
+}
+
+.loading {
+    margin-top:15px;
+    color:#007bff;
+    display:none;
+}
+
+.error {
+    margin-top:15px;
+    color:red;
+    font-weight:600;
+}
+
+.spinner {
+    border:4px solid #f3f3f3;
+    border-top:4px solid #2193b0;
+    border-radius:50%;
+    width:30px;
+    height:30px;
+    animation: spin 1s linear infinite;
+    margin:10px auto;
+}
+
+@keyframes spin {
+    100% { transform: rotate(360deg); }
+}
+</style>
+</head>
+
+<body>
+
+<div class="container">
+<h1>🌦 AJAX Weather Dashboard</h1>
+
+<div class="dashboard">
+
+<input type="text" id="cityInput" placeholder="Enter city name...">
+<button onclick="fetchWeather()">Get Weather</button>
+
+<div class="loading" id="loading">
+    <div class="spinner"></div>
+    Fetching weather data...
+</div>
+
+<div class="error" id="errorMessage"></div>
+
+<div class="weather-card" id="weatherCard">
+    <div class="weather-value" id="cityName"></div>
+    <div class="weather-value" id="temperature"></div>
+    <div class="weather-value" id="humidity"></div>
+    <div class="weather-value" id="condition"></div>
+</div>
+
+</div>
+</div>
+
+<script>
+
+const API_KEY = "396377b14ddbeaf530c7ddb2b3b80c1b";
+
+let cachedCity = null;
+let cachedData = null;
+
+function fetchWeather() {
+
+    const city = document.getElementById("cityInput").value.trim();
+    const loading = document.getElementById("loading");
+    const errorMessage = document.getElementById("errorMessage");
+    const weatherCard = document.getElementById("weatherCard");
+
+    if (!city) return;
+
+    errorMessage.textContent = "";
+    weatherCard.style.display = "none";
+
+    if (city.toLowerCase() === cachedCity) {
+        displayWeather(cachedData);
+        return;
+    }
+
+    loading.style.display = "block";
+
+    const url = `https://api.openweathermap.org/data/2.5/weather?q=${city}&appid=${API_KEY}&units=metric`;
+
+    fetch(url)
+        .then(response => {
+
+            if (!response.ok) {
+                if (response.status === 404) {
+                    throw new Error("City not found (404)");
+                } else {
+                    throw new Error("Server error (" + response.status + ")");
+                }
+            }
+
+            return response.json();
+        })
+        .then(data => {
+
+            loading.style.display = "none";
+
+            // Cache result
+            cachedCity = city.toLowerCase();
+            cachedData = data;
+
+            displayWeather(data);
+
+        })
+        .catch(error => {
+
+            loading.style.display = "none";
+            errorMessage.textContent = error.message;
+
+        });
+}
+
+function displayWeather(data) {
+
+    const weatherCard = document.getElementById("weatherCard");
+
+    document.getElementById("cityName").textContent =
+        "City: " + data.name;
+
+    document.getElementById("temperature").textContent =
+        "Temperature: " + data.main.temp + " °C";
+
+    document.getElementById("humidity").textContent =
+        "Humidity: " + data.main.humidity + " %";
+
+    document.getElementById("condition").textContent =
+        "Condition: " + data.weather[0].description;
+
+    weatherCard.style.display = "block";
+}
+
+</script>
+
+</body>
+</html>

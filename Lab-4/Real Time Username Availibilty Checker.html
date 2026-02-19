@@ -1,0 +1,310 @@
+<!DOCTYPE html>
+<html lang="en">\
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width = device-width, initial-scale=1.0">
+<title> Real Time Username Availibilty Checker </title>
+
+<style>
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background: linear-gradient(135deg, #4e73df, #1cc88a);
+    min-height: 100vh;
+    padding: 30px;
+}
+
+.container {
+    max-width: 1000px;
+    margin: auto;
+}
+
+h1 {
+    text-align: center;
+    color: white;
+    margin-bottom: 30px;
+}
+
+.main {
+    display: grid;
+    grid-template-columns: 1fr 350px;
+    gap: 20px;
+}
+
+.form-section, .stats-section {
+    background: white;
+    padding: 25px;
+    border-radius: 15px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+}
+
+input {
+    width: 100%;
+    padding: 12px;
+    border: 2px solid #ccc;
+    border-radius: 8px;
+    font-size: 14px;
+}
+
+input:focus {
+    border-color: #4e73df;
+    outline: none;
+}
+
+.feedback {
+    margin-top: 10px;
+    font-weight: 600;
+}
+
+.success { color: green; }
+.error { color: red; }
+.loading { color: blue;}
+
+.status-banner {
+    display: none;
+    padding: 12px;
+    margin-bottom: 15px;
+    border-radius: 8px;
+}
+
+.stats-banner.success {
+    background-color: #d4edda;
+    color: #155724;
+}
+
+.status-banner.error {
+    background-color: #f8d7da;
+    color: #721c24;
+}
+
+.btn {
+    padding: 10px 15px;
+    border: none;
+    border-radius: 8px;
+    margin-top: 15px;
+    cursor: pointer;
+    font-weight: 600;
+}
+
+.btn-primary { background: #4e73df; color: white; }
+.btn-danger { background-color: #e74a3b; color: white;}
+.btn-secondary { background-color: #858796; color: white; }
+
+.stat-card {
+    background: #f8f9fc;
+    padding: 15px;
+    border-radius: 10px;
+    text-align: center;
+    margin-bottom: 15px;
+}
+
+.stat-value {
+    font-size: 22px;
+    font-weight: bold;
+    color: #4e73df;
+}
+
+.stat-label {
+    font-size: 12px;
+    color: #666;
+}
+
+.log-box {
+    margin-top: 15px;
+    max-height: 200px;
+    overflow-y: auto;
+    background: #f8f9fc;
+    padding: 10px;
+    border-radius: 8px;
+    font-size: 13px;
+}
+
+@media(max-width: 768px) {
+    .main {
+        grid-template-columns: 1fr;
+    }
+}
+</style>
+</head>
+
+<body>
+
+<div class="container">
+<h1> Real Time Username Availibilty Checker </h1>
+
+<div class="main">
+
+<!-- Form Section -->
+<div class="form-section">
+<h2> Registration </h2>
+
+<div id="statusBanner" class="status-banner"></div>
+
+<form id="registerForm">
+    <label> Username </label>
+    <input type="text" id="username" required>
+    <div id="feedback" class="feedback"></div>
+
+    <button class="btn btn-primary" type="submit"> Register </button>
+    <button class="btn btn-danger" type="button" onclick="resetForm()"> Reset </button>
+</form>
+
+<div class="log-box" id="activityLog">
+    No activity yet.
+</div>
+
+</div>
+
+<!-- Stats Section -->
+<div class="stats-section">
+<h2> Statistics </h2>
+
+<div class="stat-card">
+    <div class="stat-value" id="totalChecks"> 0 </div>
+    <div class="stat-label"> Total Checks </div>
+</div>
+
+<div class="stat-card">
+    <div class="stat-value" id="availableCount"> 0 </div>
+    <div class="stat-label"> Available </div>
+</div>
+
+<div class="stat-card">
+    <div class="stat-value" id="takenCount"> 0 </div>
+    <div class="stat-label"> Taken </div>
+</div>
+
+<div class="stat-card">
+    <div class="stat-value" id="avgResponse"> 0 ms </div>
+    <div class="stat-label"> Avg Response Time </div>
+</div>
+
+<button class="btn btn-secondary" onclick="exportLog()"> Export Log </button>
+
+</div>
+</div>
+</div>
+
+<script>
+
+const userDatabase = {
+    users: ["riyan", "admin", "tanisha", "sienna", "akshat"]
+};
+
+let isAvailable = false;
+let totalChecks = 0;
+let availableCount = 0;
+let takenCount = 0;
+let totalResponseTime = 0;
+let logs = [];
+
+const usernameInput = document.getElementById("username");
+const feedback = document.getElementById("feedback");
+const banner = document.getElementById("statusBanner");
+const form = document.getElementById("registerForm");
+const logBox = document.getElementById("activityLog");
+
+usernameInput.addEventListener("input", checkUsername);
+
+function checkUsername() {
+
+    const username = usernameInput.value.trim().toLowerCase();
+
+    if (!username) {
+        feedback.textContent = "";
+        return;
+    }
+    const start = performance.now();
+
+    feedback.textContent = "Checking availibility...";
+    feedback.className = "feedback loading";
+
+    new Promise(resolve => {
+        setTimeout(() => resolve(userDatabase), 800);
+    })
+    .then(data => {
+        const responseTime = Math.round(performance.now() - start);
+        totalResponseTime += responseTime;
+        totalChecks++;
+
+        if(data.users.includes(username)) {
+            feedback.textContent = "Username already taken";
+            feedback.className = "feedback error";
+            isAvailable = false;
+            takenCount++;
+            showBanner("Username is already taken.", false);
+            logActivity(username, "TAKEN", responseTime);
+        } else {
+            feedback.textContent = "Username available";
+            feedback.className = "feedback success";
+            isAvailable = true;
+            availableCount++;
+            showBanner("Username is available", true);
+            logActivity(username, "AVAILABLE", responseTime);
+        }
+
+        updateStats();
+    });
+}
+
+function showBanner(message, success) {
+    banner.style.display = "block";
+    banner.textContent = message;
+    banner.className = "status-banner " + (success ? "success" : "error");
+}
+
+function logActivity(username, status, time) {
+    const entry = `${new Date().toLocaleTimeString()} | ${username} → ${status} (${time} ms)`;
+    logs.unshift(entry);
+    if (logs.length > 20) logs.pop();
+    logBox.innerHTML = logs.join("<br>");
+}
+
+function updateStats() {
+    document.getElementById("totalChecks").textContent = totalChecks;
+    document.getElementById("availableCount").textContent = availableCount;
+    document.getElementById("takenCount").textContent = takenCount;
+    document.getElementById("avgResponse").textContent =
+        totalChecks ? Math.round(totalResponseTime / totalChecks) + " ms" : "0 ms";
+}
+
+form.addEventListener("submit", function(e) {
+    if (!isAvailable) {
+        e.preventDefault();
+        alert("Please choose an available username before submitting.");
+    } else {
+        alert("Registration successful!");
+    }
+});
+
+function resetForm() {
+    form.reset();
+    feedback.textContent = "";
+    banner.style.display = "none";
+}
+
+function exportLog() {
+    if (logs.length === 0) {
+        alert("No logs to export.");
+        return;
+    }
+
+    const blob = new Blob([logs.join("\n")], { type: "text/plain" });
+    const url = URL.createObjectURL(blob);
+
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = "username-check-log.txt";
+    a.click();
+
+    URL.revokeObjectURL(url);
+}
+
+</script>
+</body>
+</html>

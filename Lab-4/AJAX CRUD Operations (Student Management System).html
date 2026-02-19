@@ -1,0 +1,297 @@
+<!DOCTYPE html>\
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title> AJAX CRUD - Student Management System </title>
+
+<style>
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: Arial, Helvetica, sans-serif;
+    background: linear-gradient(135deg, #1e3c72, #2a5298);
+    min-height: 100vh;
+    padding: 30px;
+}
+
+.container { 
+    max-width: 1200px;
+    margin: auto;
+}
+
+h1 {
+    text-align: center;
+    color: white;
+    margin-bottom: 30px;
+}
+
+.main {
+    display: grid;
+    grid-template-columns: 1fr 400px;
+    gap: 20px;
+}
+
+.form-section, .table-section {
+    background: white;
+    padding: 25px;
+    border-radius: 15px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+}
+
+input {
+    width: 100%;
+    padding: 10px;
+    margin-bottom: 12px;
+    border-radius: 8px;
+    border: 2px solid #ccc;
+}
+
+input:focus {
+    outline: none;
+    border-color: #2a5298;
+}
+
+button {
+    padding: 8px 14px;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    margin-right: 5px;
+    font-weight: 600;
+}
+
+.btn-primary { background: #2a5298; color: white; }
+.btn-warning { background: #f39c12; color: white; }
+.btn-danger { background: #e74c3c; color: white; }
+
+.message {
+    margin-top: 10px;
+    font-weight: 600;
+}
+
+.success { color: green; }
+.error { color: red; }
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+th, td {
+    padding: 10px;
+    border-bottom: 1px solid #ddd;
+    text-align: center;
+}
+
+th {
+    background: #f4f4f4;
+}
+
+@media(max-width:786px) {
+    .main { grid-template-columns: 1fr; }
+}
+
+</style>
+</head>
+
+<body>
+
+<div class="container">
+<h1> Student Management System (AJAX CRUD) </h1>
+
+<div class="main">
+
+<!-- FORM SECTION -->
+<div class="form-section">
+<h2> Add / Update Student </h2>
+
+<input type="text" id="studentId" placeholder="Student ID">
+<input type="text" id="studentName" placeholder="Name">
+<input type="text" id="studentDept" placeholder="Department">
+<input type="number" id="studentMarks" placeholder="Marks">
+
+<button class="btn-primary" onclick="createStudent()"> Create </button>
+<button class="btn-warning" onclick="updateStudent()"> Update </button>
+
+<div id="responseMessage" class="message"></div>
+</div>
+
+<!-- Table Section -->
+<div class="table-section">
+<h2> Student Records </h2>
+
+<table>
+<thead>
+<tr>
+<th> ID </th>
+<th> Name </th>
+<th> Dept </th>
+<th> Marks </th>
+<th> Action </th>
+</tr>
+</thead>
+<tbody id="studentTable">
+</tbody>
+</table>
+
+</div>
+</div>
+</div>
+
+<script>
+
+let students = [
+    { id: "101", name: "Riyan", dept: "CSE", marks: 85 },
+    { id: "102", name: "Sienna", dept: "ECE", marks: 90 }
+];
+
+function fakeFetch(operation, payload) {
+    return new Promise((resolve, reject) => {
+
+        setTimeout(() => {
+
+            try {
+                switch(operation) {
+
+                    case "CREATE":
+                        if(students.find(s => s.id === payload.id)) {
+                            resolve({status:404, message:"Student ID already exists" });
+                        } else {
+                            students.push(payload);
+                            resolve({ status:200, data:payload });
+                        }
+                        break;
+
+                    case "READ":
+                        resolve({ status:200, data:students });
+                        break;
+
+                    case "UPDATE":
+                        let student = students.find(s => s.id === payload.id);
+                        if(!student) {
+                            resolve({ status:404, message:"Student not found" });
+                        } else {
+                            Object.assign(student, payload);
+                            resolve({ status:200, data:student });
+                        }
+                        break;
+
+                    case "DELETE":
+                        let index = student.findIndex(s => s.id === payload.id);
+                        if(index === -1) {
+                            resolve({ status:404, message:"Student not found" });
+                        } else {
+                            students.splice(index, 1);
+                            resolve({ status:200 });
+                        }
+                        break;
+
+                    default:
+                        resolve({ status:500, message:"Server error" });
+                 }
+
+            } catch {
+                resolve({ status:500, message:"Internal server error" });
+            }
+
+        }, 700);
+    });
+}
+
+function createStudent() {
+
+const newStudent = getFormData();
+
+fakeFetch("CREATE", newStudent)
+.then(handleResponse)
+.then(renderStudents);
+}
+
+
+function fetchStudents() {
+fakeFetch("READ")
+.then(res => {
+    if(res.status === 200){
+        renderStudents(res.data);
+    }
+});
+}
+
+
+function updateStudent() {
+
+const updatedStudent = getFormData();
+
+fakeFetch("UPDATE", updatedStudent)
+.then(handleResponse)
+.then(renderStudents);
+}
+
+function deleteStudent(id) {
+
+fakeFetch("DELETE", { id })
+.then(handleResponse)
+.then(renderStudents);
+}
+
+function handleResponse(response) {
+
+const msg = document.getElementById("responseMessage");
+
+if(response.status === 200){
+    msg.textContent = "Operation successful (200 OK)";
+    msg.className = "message success";
+}
+else if(response.status === 404){
+    msg.textContent = response.message + " (404 Not Found)";
+    msg.className = "message error";
+}
+else {
+    msg.textContent = response.message + " (500 Server Error)";
+    msg.className = "message error";
+}
+
+return students;
+}
+
+function renderStudents(data = students) {
+
+const table = document.getElementById("studentTable");
+table.innerHTML = "";
+
+data.forEach(student => {
+
+    table.innerHTML += `
+    <tr>
+        <td>${student.id}</td>
+        <td>${student.name}</td>
+        <td>${student.dept}</td>
+        <td>${student.marks}</td>
+        <td>
+            <button class="btn-danger" onclick="deleteStudent('${student.id}')">Delete</button>
+        </td>
+    </tr>
+    `;
+});
+}
+
+function getFormData(){
+return {
+    id: document.getElementById("studentId").value.trim(),
+    name: document.getElementById("studentName").value.trim(),
+    dept: document.getElementById("studentDept").value.trim(),
+    marks: document.getElementById("studentMarks").value.trim()
+};
+}
+
+fetchStudents();
+
+</script>
+
+</body>
+</html>

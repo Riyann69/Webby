@@ -1,0 +1,265 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title> AJAX Product Search System </title>
+
+<style>
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background: linear-gradient(135deg, #2c3e50, #3498db);
+    min-height: 100vh;
+    padding: 30px;
+}
+
+.container {
+    max-width: 1100px;
+    margin: auto;
+}
+
+h1 {
+    text-align: center;
+    color: white;
+    margin-bottom: 30px;
+}
+
+.main {
+    display: grid;
+    grid-template-columns: 1fr 350px;
+    gap: 20px;
+}
+
+.search-section, .stats-section {
+    background-color: white;
+    padding: 25px;
+    border-radius: 15px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+}
+
+input {
+    width: 100%;
+    padding: 12px;
+    border-radius: 8px;
+    border: 2px solid #ccc;
+    font-size: 14px;
+}
+
+input.focus {
+    outline: none;
+    border-color: #3498db;
+}
+
+.status {
+    margin-top: 10px;
+    font-weight: 600;
+}
+
+.loading{ color: blue; }
+.error {  color: red; }
+
+.product-card{
+    background: #f8f9fa;
+    padding: 15px;
+    margin-top: 15px;
+    border-radius: 10px;
+    border-left: 5px solid #3498db;
+}
+
+.product-name {
+    font-weight: bold;
+    font-size: 16px;
+}
+
+.product-price {
+    color: #27ae60;
+    font-weight: 600;
+}
+
+.product-category {
+    font-size: 13px;
+    color: #555;
+}
+
+.stat-card {
+    background: #f1f2f6;
+    padding: 15px;
+    border-radius: 10px;
+    text-align: center;
+    margin-bottom: 15px;
+}
+
+.stat-value {
+    font-size: 22px;
+    font-weight: bold;
+    color: #3498db;
+}
+
+.stat-label {
+    font-size: 12px;
+    color: #666;
+}
+
+@media(max-width: 768px) {
+    .main {
+        grid-template-columns: 1fr;
+    }
+}
+
+</style>
+</head>
+<body>
+
+<div class="container">
+<h1> AJAX-Based Product Search </h1>
+
+<div class="main">
+
+<!-- Search Section -->
+<div class="search-section">
+<h2> Search Products </h2>
+
+<input type="text" id="searchInput" placeholder="Search by name or categroy...">
+
+<div id="statusMessage" class="status"></div>
+
+<div id="resultsContainer"></div>
+
+</div>
+
+<!-- Stats Section -->
+<div class="stats-section">
+<h2> Search Statistics </h2>
+
+<div class="stat-card">
+    <div class="stat-value" id="totalSearches"> 0 </div>
+    <div class="stat-label"> Total Searches </div>
+</div>
+
+<div class="stat-card">
+    <div class="stat-value" id="lastResponseTime"> 0 ms </div>
+    <div class="stat-label"> Last Response Time </div>
+</div>
+
+<div class="stat-card">
+    <div class="stat-value" id="resultCount"> 0 </div>
+    <div class="stat-label"> Results Found </div>
+</div>
+
+</div>
+</div>
+</div>
+
+<script>
+
+const productDatabase = {
+    products: [
+        { name: "iPhone 17", price: 84999, category: "Electronics" },
+        { name: "Samsung Galaxy S25", price: 79999, category: "Electronics" },
+        { name: "Nike Air Max", price: 5999, category: "Footwear" },
+        { name: "Adidas Hoodie", price: 2999, category: "Clothing" },
+        { name: "MacBook Air M2", price: 114999, category: "Electronics" },
+        { name: "Wooden Study Table", price: 8999, category: "Furniture" }
+    ]
+};
+
+let debounceTimer;
+let totalSearches = 0;
+
+const searchInput = document.getElementById("searchInput");
+const resultsContainer = document.getElementById("resultsContainer");
+const statusMessage = document.getElementById("statusMessage");
+
+searchInput.addEventListener("input", function() {
+
+    clearTimeout(debounceTimer);
+
+    debounceTimer = setTimeout(() => {
+        performSearch(searchInput.value.trim().toLowerCase());
+    }, 500);
+
+});
+
+function performSearch(query) {
+    if(!query) {
+        resultsContainer.innerHTML = "";
+        statusMessage.textContent = "";
+    }
+
+    const startTime = performance.now();
+    totalSearches++;
+    document.getElementById("totalSearches").textContent = totalSearches;
+
+    statusMessage.textContent = "Searching...";
+    statusMessage.className = "status loading";
+
+    new Promise((resolve, reject) => {
+        setTimeout(() => {
+            if(Math.random() < 0.05) {
+                reject("Network error occurred.");
+            } else {
+                resolve(productDatabase.products);
+            }
+        }, 800);
+    })
+    .then(products => {
+
+        const filtered = products.filter(product =>
+            product.name.toLowerCase().includes(query) ||
+            product.category.toLowerCase().includes(query)
+        );
+
+        displayResults(filtered);
+
+        const responseTime = Math.round(performance.now() - startTime);
+        document.getElementById("lastResponseTime").textContent = responseTime + " ms";
+
+    })
+    .catch(error => {
+        statusMessage.textContent = error;
+        statusMessage.className = "status error";
+        resultsContainer.innerHTML = "";
+        document.getElementById("resultCount").textContent = 0;
+    });
+
+}
+
+function displayResults(results) {
+
+    resultsContainer.innerHTML = "";
+
+    if(results.length === 0) {
+        statusMessage.textContent = "No results found.";
+        statusMessage.className = "status error";
+        document.getElementById("resultCount").textContent = 0;
+        return;
+    }
+
+    statusMessage.textContent = "Results loaded successfully."
+    statusMessage.className = "status";
+
+    document.getElementById("resultCount").textContent = results.length;
+
+    results.forEach(product => {
+
+        const card = document.createElement("div");
+        card.className = "product-card";
+
+        card.innerHTML = `
+            <div class="product-name">${product.name}</div>
+            <div class="product-price">₹ ${product.price}</div>
+            <div class="product-category">Category: ${product.category}</div>
+        `;
+
+        resultsContainer.appendChild(card);
+    });
+}
+</script>
+</body>
+</html>
