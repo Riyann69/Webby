@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <title>Online Book Finder</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: Arial, sans-serif; background: #f5f6fa; }
+    header { background: #1a252f; color: white; padding: 20px 40px; font-size: 22px; font-weight: bold; }
+    .container { max-width: 1000px; margin: 30px auto; padding: 0 20px; }
+    .controls { background: white; border-radius: 10px; padding: 20px; margin-bottom: 24px; box-shadow: 0 2px 8px rgba(0,0,0,0.08); display: flex; flex-wrap: wrap; gap: 10px; align-items: center; }
+    input { flex: 1; min-width: 200px; padding: 10px; border: 1px solid #ddd; border-radius: 6px; font-size: 14px; }
+    select { padding: 10px; border: 1px solid #ddd; border-radius: 6px; font-size: 14px; background: white; }
+    .btn { padding: 10px 18px; border: none; border-radius: 6px; cursor: pointer; font-size: 13px; font-weight: bold; }
+    .btn-blue   { background: #2980b9; color: white; }
+    .btn-green  { background: #27ae60; color: white; }
+    .btn-orange { background: #e67e22; color: white; }
+    .btn-red    { background: #c0392b; color: white; }
+    .btn-grey   { background: #95a5a6; color: white; }
+    .btn:hover  { opacity: 0.85; }
+    .results { background: white; border-radius: 10px; padding: 24px; box-shadow: 0 2px 8px rgba(0,0,0,0.08); }
+    .section-title { font-size: 13px; font-weight: bold; color: #7f8c8d; text-transform: uppercase; margin-bottom: 14px; }
+    table { width: 100%; border-collapse: collapse; font-size: 14px; }
+    thead tr { background: #1a252f; color: white; }
+    th, td { padding: 12px 14px; text-align: left; }
+    tbody tr:nth-child(even) { background: #f9f9f9; }
+    tbody tr:hover { background: #eaf4fb; }
+    .rating { color: #f39c12; font-weight: bold; }
+    .price  { color: #27ae60; font-weight: bold; }
+    .badge  { display: inline-block; padding: 2px 10px; border-radius: 12px; font-size: 11px; background: #dfe6e9; }
+    .pagination { display: flex; gap: 8px; justify-content: center; margin-top: 16px; }
+    #status { color: #7f8c8d; font-size: 13px; margin-top: 10px; }
+  </style>
+</head>
+<body>
+
+<header>📚 Online Book Finder</header>
+
+<div class="container">
+  <div class="controls">
+    <input type="text" id="searchInput" placeholder="🔍 Search by title..." />
+    <button class="btn btn-blue" onclick="searchBooks()">Search</button>
+
+    <select id="categorySelect">
+      <option value="">All Categories</option>
+      <option>Programming</option>
+      <option>Database</option>
+      <option>Architecture</option>
+      <option>Algorithms</option>
+    </select>
+    <button class="btn btn-green" onclick="filterByCategory()">Filter</button>
+
+    <select id="sortField">
+      <option value="price">Sort by Price ↑</option>
+      <option value="rating">Sort by Rating ↓</option>
+    </select>
+    <button class="btn btn-orange" onclick="sortBooks()">Sort</button>
+
+    <button class="btn btn-red" onclick="topRated()">⭐ Top Rated</button>
+    <button class="btn btn-grey" onclick="loadPage(1)">Reset</button>
+  </div>
+
+  <div class="results">
+    <div class="section-title" id="resultLabel">All Books</div>
+    <div id="tableContainer"></div>
+    <div id="status"></div>
+    <div class="pagination" id="pagination"></div>
+  </div>
+</div>
+
+<script>
+  function renderTable(books) {
+    if (!books.length) {
+      document.getElementById('tableContainer').innerHTML = '<p style="color:#aaa;padding:20px">No books found.</p>';
+      return;
+    }
+    document.getElementById('tableContainer').innerHTML = `
+      <table>
+        <thead><tr>
+          <th>Title</th><th>Author</th><th>Category</th><th>Price</th><th>Rating</th><th>Year</th>
+        </tr></thead>
+        <tbody>
+          ${books.map(b => `
+            <tr>
+              <td><strong>${b.title}</strong></td>
+              <td>${b.author}</td>
+              <td><span class="badge">${b.category}</span></td>
+              <td class="price">₹${b.price}</td>
+              <td class="rating">★ ${b.rating}</td>
+              <td>${b.year}</td>
+            </tr>`).join('')}
+        </tbody>
+      </table>`;
+  }
+
+  // 1. SEARCH
+  async function searchBooks() {
+    const title = document.getElementById('searchInput').value.trim();
+    if (!title) return loadPage(1);
+    const books = await fetch(`/books/search?title=${encodeURIComponent(title)}`).then(r => r.json());
+    document.getElementById('resultLabel').textContent = `Search: "${title}"`;
+    document.getElementById('status').textContent = `${books.length} result(s)`;
+    document.getElementById('pagination').innerHTML = '';
+    renderTable(books);
+  }
+
+  // 2. FILTER BY CATEGORY
+  async function filterByCategory() {
+    const cat = document.getElementById('categorySelect').value;
+    if (!cat) return loadPage(1);
+    const books = await fetch(`/books/category/${cat}`).then(r => r.json());
+    document.getElementById('resultLabel').textContent = `Category: ${cat}`;
+    document.getElementById('status').textContent = `${books.length} book(s)`;
+    document.getElementById('pagination').innerHTML = '';
+    renderTable(books);
+  }
+
+  // 3. SORT
+  async function sortBooks() {
+    const field = document.getElementById('sortField').value;
+    const books = await fetch(`/books/sort/${field}`).then(r => r.json());
+    document.getElementById('resultLabel').textContent = field === 'price' ? 'Sorted by Price ↑' : 'Sorted by Rating ↓';
+    document.getElementById('status').textContent = `${books.length} book(s)`;
+    document.getElementById('pagination').innerHTML = '';
+    renderTable(books);
+  }
+
+  // 4. TOP RATED
+  async function topRated() {
+    const books = await fetch('/books/top').then(r => r.json());
+    document.getElementById('resultLabel').textContent = '⭐ Top Rated (Rating ≥ 4)';
+    document.getElementById('status').textContent = `Top ${books.length} books`;
+    document.getElementById('pagination').innerHTML = '';
+    renderTable(books);
+  }
+
+  // 5. PAGINATION
+  async function loadPage(page) {
+    const data = await fetch(`/books?page=${page}`).then(r => r.json());
+    document.getElementById('resultLabel').textContent = 'All Books';
+    document.getElementById('status').textContent = `Page ${data.page} of ${data.totalPages} (${data.total} total)`;
+    renderTable(data.books);
+
+    let html = '';
+    if (data.page > 1)
+      html += `<button class="btn btn-grey" onclick="loadPage(${data.page - 1})">← Prev</button>`;
+    for (let i = 1; i <= data.totalPages; i++)
+      html += `<button class="btn" style="background:${i === data.page ? '#1a252f' : '#ddd'};color:${i === data.page ? 'white' : '#333'}" onclick="loadPage(${i})">${i}</button>`;
+    if (data.page < data.totalPages)
+      html += `<button class="btn btn-blue" onclick="loadPage(${data.page + 1})">Next →</button>`;
+    document.getElementById('pagination').innerHTML = html;
+  }
+
+  loadPage(1);
+</script>
+</body>
+</html>

@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <title>Student Notes Manager</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: Arial, sans-serif; background: #f0f4f8; }
+    header { background: #2c3e50; color: white; padding: 20px 40px; font-size: 22px; font-weight: bold; }
+    .container { max-width: 900px; margin: 30px auto; padding: 0 20px; }
+    .card { background: white; border-radius: 10px; padding: 24px; margin-bottom: 24px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
+    .card h2 { margin-bottom: 16px; color: #2c3e50; }
+    input, textarea { width: 100%; padding: 10px; margin-bottom: 12px; border: 1px solid #ddd; border-radius: 6px; font-size: 14px; }
+    textarea { height: 80px; resize: vertical; }
+    .btn { padding: 10px 20px; border: none; border-radius: 6px; cursor: pointer; font-weight: bold; font-size: 14px; }
+    .btn-primary { background: #3498db; color: white; }
+    .btn-danger  { background: #e74c3c; color: white; }
+    .btn-warning { background: #f39c12; color: white; }
+    .note-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 16px; }
+    .note-card { background: #fafafa; border: 1px solid #e0e0e0; border-radius: 8px; padding: 16px; }
+    .note-card h3 { margin-bottom: 4px; color: #2c3e50; }
+    .note-card .subject { font-size: 12px; color: #7f8c8d; margin-bottom: 8px; }
+    .note-card p { font-size: 13px; color: #555; margin-bottom: 10px; }
+    .note-card .date { font-size: 11px; color: #aaa; margin-bottom: 10px; }
+    .note-actions { display: flex; gap: 8px; }
+    .modal-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.5); justify-content: center; align-items: center; z-index: 100; }
+    .modal-overlay.active { display: flex; }
+    .modal { background: white; border-radius: 10px; padding: 28px; width: 420px; }
+    .modal h2 { margin-bottom: 16px; }
+    .modal-actions { display: flex; gap: 10px; justify-content: flex-end; margin-top: 8px; }
+    #toast { position: fixed; bottom: 24px; right: 24px; padding: 12px 20px; border-radius: 8px; display: none; color: white; font-size: 14px; }
+  </style>
+</head>
+<body>
+
+<header>📓 Student Notes Manager</header>
+
+<div class="container">
+  <!-- ADD NOTE -->
+  <div class="card">
+    <h2>➕ Add New Note</h2>
+    <input type="text" id="title" placeholder="Title (e.g. MongoDB Basics)" />
+    <input type="text" id="subject" placeholder="Subject (e.g. Database)" />
+    <textarea id="description" placeholder="Description..."></textarea>
+    <button class="btn btn-primary" onclick="addNote()">Add Note</button>
+  </div>
+
+  <!-- VIEW NOTES -->
+  <div class="card">
+    <h2>📋 All Notes</h2>
+    <div class="note-grid" id="notesGrid"></div>
+  </div>
+</div>
+
+<!-- EDIT MODAL -->
+<div class="modal-overlay" id="editModal">
+  <div class="modal">
+    <h2>✏️ Edit Note</h2>
+    <input type="hidden" id="editId" />
+    <input type="text" id="editTitle" placeholder="Title" />
+    <input type="text" id="editSubject" placeholder="Subject" />
+    <textarea id="editDescription" placeholder="Description..."></textarea>
+    <div class="modal-actions">
+      <button class="btn" style="background:#eee" onclick="closeModal()">Cancel</button>
+      <button class="btn btn-primary" onclick="updateNote()">Save</button>
+    </div>
+  </div>
+</div>
+
+<div id="toast"></div>
+
+<script>
+  function showToast(msg, color = '#2ecc71') {
+    const t = document.getElementById('toast');
+    t.textContent = msg;
+    t.style.background = color;
+    t.style.display = 'block';
+    setTimeout(() => t.style.display = 'none', 2500);
+  }
+
+  async function loadNotes() {
+    const notes = await fetch('/notes').then(r => r.json());
+    const grid = document.getElementById('notesGrid');
+    if (!notes.length) {
+      grid.innerHTML = '<p style="color:#aaa">No notes yet. Add your first note!</p>';
+      return;
+    }
+    grid.innerHTML = notes.map(n => `
+      <div class="note-card">
+        <h3>${n.title}</h3>
+        <div class="subject">📚 ${n.subject}</div>
+        <p>${n.description}</p>
+        <div class="date">🗓 ${n.created_date}</div>
+        <div class="note-actions">
+          <button class="btn btn-warning" onclick="openEdit('${n._id}','${n.title}','${n.subject}','${n.description}')">Edit</button>
+          <button class="btn btn-danger"  onclick="deleteNote('${n._id}')">Delete</button>
+        </div>
+      </div>`).join('');
+  }
+
+  async function addNote() {
+    const title       = document.getElementById('title').value.trim();
+    const subject     = document.getElementById('subject').value.trim();
+    const description = document.getElementById('description').value.trim();
+    if (!title || !subject || !description) return showToast('Fill all fields!', '#e74c3c');
+
+    await fetch('/notes', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ title, subject, description })
+    });
+
+    document.getElementById('title').value = '';
+    document.getElementById('subject').value = '';
+    document.getElementById('description').value = '';
+    showToast('Note added!');
+    loadNotes();
+  }
+
+  function openEdit(id, title, subject, desc) {
+    document.getElementById('editId').value          = id;
+    document.getElementById('editTitle').value       = title;
+    document.getElementById('editSubject').value     = subject;
+    document.getElementById('editDescription').value = desc;
+    document.getElementById('editModal').classList.add('active');
+  }
+
+  function closeModal() {
+    document.getElementById('editModal').classList.remove('active');
+  }
+
+  async function updateNote() {
+    const id          = document.getElementById('editId').value;
+    const title       = document.getElementById('editTitle').value.trim();
+    const subject     = document.getElementById('editSubject').value.trim();
+    const description = document.getElementById('editDescription').value.trim();
+
+    await fetch(`/notes/${id}`, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ title, subject, description })
+    });
+
+    closeModal();
+    showToast('Note updated!');
+    loadNotes();
+  }
+
+  async function deleteNote(id) {
+    if (!confirm('Delete this note?')) return;
+    await fetch(`/notes/${id}`, { method: 'DELETE' });
+    showToast('Deleted', '#e74c3c');
+    loadNotes();
+  }
+
+  loadNotes();
+</script>
+</body>
+</html>
