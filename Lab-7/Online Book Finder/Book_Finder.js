@@ -4,7 +4,7 @@ const path = require('path');
 
 const app = express();
 const PORT = 4000;
-const MONGO_URI = 'mongodb+srv://riyanwankhede_db_user:4ZCe4feXdJgcORn6@cluster0.rjfdah8.mongodb.net/';
+const MONGO_URI = 'mongodb+srv://riyanwankhede_db_user:<password>@cluster0.rjfdah8.mongodb.net/';
 const DB_NAME = 'book_finder';
 
 let db;
