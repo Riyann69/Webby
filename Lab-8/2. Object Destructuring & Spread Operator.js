@@ -13,4 +13,4 @@ const updatedStudent = {
     grade: "A"
 };
 
-console.log(updatedStudent);
+console.log(updatedStudent)
